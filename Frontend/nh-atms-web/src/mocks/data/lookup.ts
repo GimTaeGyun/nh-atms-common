@@ -2,7 +2,7 @@
  * 공통 조회 목 데이터 — API 계약 §2 모양 그대로(필드 이름·타입이 계약서). createRng 로 새로고침해도 같은 값.
  * 실제 값(코드 체계·사무소명)은 개발 DB(TB_ 테이블)에서 확인한다. 여기 값은 화면 확인용 가짜다.
  */
-import type { Code, Corner, DistinctTarget, DistinctValue, Holiday, Machine, Model, Office, Person, Sido, Sigun, Vendor } from '@/domain/lookup';
+import type { Code, Corner, DistinctTarget, DistinctValue, Holiday, Machine, Model, Office, Person, Sido, Sigun, Src, Vendor } from '@/domain/lookup';
 import { createRng } from '@/utils/random';
 import { dayjs } from '@/utils/date';
 
@@ -17,17 +17,18 @@ export const SIDO: Sido[] = [
   { sidoCode: '41', sidoNm: '경기도' },
 ];
 
+/** 시군 — TB_CO_SIGUN.SIGUN_CODE VARCHAR2(3)(시도 안에서의 3자리) */
 export const SIGUN: Sigun[] = [
-  { sidoCode: '11', sigunCode: '11110', sigunNm: '종로구' },
-  { sidoCode: '11', sigunCode: '11140', sigunNm: '중구' },
-  { sidoCode: '11', sigunCode: '11680', sigunNm: '강남구' },
-  { sidoCode: '11', sigunCode: '11650', sigunNm: '서초구' },
-  { sidoCode: '26', sigunCode: '26350', sigunNm: '해운대구' },
-  { sidoCode: '26', sigunCode: '26230', sigunNm: '부산진구' },
-  { sidoCode: '30', sigunCode: '30170', sigunNm: '서구' },
-  { sidoCode: '29', sigunCode: '29140', sigunNm: '서구' },
-  { sidoCode: '41', sigunCode: '41135', sigunNm: '성남시 분당구' },
-  { sidoCode: '41', sigunCode: '41111', sigunNm: '수원시 장안구' },
+  { sidoCode: '11', sigunCode: '110', sigunNm: '종로구' },
+  { sidoCode: '11', sigunCode: '140', sigunNm: '중구' },
+  { sidoCode: '11', sigunCode: '680', sigunNm: '강남구' },
+  { sidoCode: '11', sigunCode: '650', sigunNm: '서초구' },
+  { sidoCode: '26', sigunCode: '350', sigunNm: '해운대구' },
+  { sidoCode: '26', sigunCode: '230', sigunNm: '부산진구' },
+  { sidoCode: '30', sigunCode: '170', sigunNm: '서구' },
+  { sidoCode: '29', sigunCode: '140', sigunNm: '서구' },
+  { sidoCode: '41', sigunCode: '135', sigunNm: '성남시 분당구' },
+  { sidoCode: '41', sigunCode: '111', sigunNm: '수원시 장안구' },
 ];
 
 const sidoNm = (code: string) => SIDO.find((s) => s.sidoCode === code)?.sidoNm ?? null;
@@ -57,17 +58,27 @@ export const VENDORS: Vendor[] = [
   { vendCode: '04', vendNm: null },
 ];
 
+/**
+ * 기기모델 — TB_CO_MODEL(VEND_CODE·MCN_TYPE·MODEL_CODE 모두 VARCHAR2(2), PK 3개).
+ * 기기사 01 의 'A1' 은 기기구분 01·02 두 곳에 있다 → 모델 콤보 값이 겹치는 경우를 목에서도 보이게 둔다(ModelSelect 값 규칙).
+ */
 export const MODELS: Model[] = [
-  { vendCode: '01', mcnType: 'ATM', modelCode: 'AT3200', modelNm: 'ATM-3200' },
-  { vendCode: '01', mcnType: 'ATM', modelCode: 'AT3500', modelNm: 'ATM-3500' },
-  { vendCode: '01', mcnType: 'STM', modelCode: 'ATSTM1', modelNm: '에이텍 STM' },
-  { vendCode: '02', mcnType: 'ATM', modelCode: 'HY4100', modelNm: 'ATM-4100' },
-  { vendCode: '02', mcnType: 'BIL', modelCode: 'HYBIL1', modelNm: '공과금수납기' },
-  { vendCode: '03', mcnType: 'ATM', modelCode: 'CH1000', modelNm: '청호 ATM' },
-  { vendCode: '04', mcnType: 'ATM', modelCode: 'UN0001', modelNm: null },
+  { vendCode: '01', mcnType: '01', modelCode: 'A1', modelNm: 'ATM-3200' },
+  { vendCode: '01', mcnType: '01', modelCode: 'A2', modelNm: 'ATM-3500' },
+  { vendCode: '01', mcnType: '02', modelCode: 'A1', modelNm: '에이텍 STM' },
+  { vendCode: '02', mcnType: '01', modelCode: 'H1', modelNm: 'ATM-4100' },
+  { vendCode: '02', mcnType: '03', modelCode: 'B1', modelNm: '공과금수납기' },
+  { vendCode: '03', mcnType: '01', modelCode: 'C1', modelNm: '청호 ATM' },
+  { vendCode: '04', mcnType: '01', modelCode: 'U1', modelNm: null },
 ];
 
-const SRCS: [string, string][] = [['A1', 'ATM 일반형'], ['A2', 'ATM 365형'], ['S1', 'STM'], ['B1', '공과금수납기']];
+/** 기종(SRC) — TB_NMS_SRC(SRC VARCHAR2(2) PK, SRC_NM VARCHAR2(40), VEND_CODE VARCHAR2(2), KOM_TYPE VARCHAR2(5)) */
+export const SRCS: Src[] = [
+  { src: 'A1', srcNm: 'ATM 일반형', vendCode: '01', komType: '1' },
+  { src: 'A2', srcNm: 'ATM 365형', vendCode: '02', komType: '1' },
+  { src: 'S1', srcNm: 'STM', vendCode: '01', komType: '2' },
+  { src: 'B1', srcNm: '공과금수납기', vendCode: null, komType: null },
+];
 const CORNER_WORDS = ['점내', '점내365', '역 2번출구', '지하상가', '대합실', '1층 로비', '테스트실'];
 const NAMES = ['김민준', '이서연', '박지호', '최수아', '정예준', '강하윤', '조도윤', '윤지우', '장서준', '임하은', '한시우', '오지민'];
 const JIKEUB = ['과장', '차장', '대리', '주임', '계장', '팀장'];
@@ -85,7 +96,7 @@ OFFICES.forEach((o, oi) => {
   const mcnCount = oi === 0 ? 6 : rng.int(2, 4);
   for (let m = 0; m < mcnCount; m++) {
     const corner = CORNERS.filter((c) => c.ofcCode === o.ofcCode)[m % cornerCount];
-    const [src, srcNm] = rng.pick(SRCS);
+    const { src, srcNm } = rng.pick(SRCS);
     const vendor = rng.pick(VENDORS);
     MACHINES.push({
       ofcCode: o.ofcCode,

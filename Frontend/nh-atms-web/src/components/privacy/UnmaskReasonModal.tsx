@@ -57,7 +57,7 @@ export const UnmaskReasonModal = ({ open, onCancel, onSubmit, title = '개인정
   };
 
   return (
-    <Modal open={open} title={title} onCancel={cancel} onOk={() => form.submit()} okText="열람" cancelText="취소" confirmLoading={loading} destroyOnHidden maskClosable={false}>
+    <Modal open={open} title={title} onCancel={cancel} onOk={() => form.submit()} okText="열람" cancelText="취소" confirmLoading={loading} destroyOnHidden mask={{ closable: false }}>
       <Alert type="warning" showIcon style={{ marginBottom: 12 }} title="개인정보 보호 대상입니다." description={description ?? '열람 사유를 입력하면 권한 확인 후 원문이 표시되며, 열람 기록이 저장됩니다.'} />
       <Form form={form} layout="vertical" onFinish={finish} preserve={false}>
         <Form.Item name="reasonType" label="열람 사유" rules={[{ required: true, message: VMSG.select('열람 사유') }]}>

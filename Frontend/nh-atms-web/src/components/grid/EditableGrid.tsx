@@ -11,8 +11,15 @@ import './gridExt.css';
 
 export type EditType = 'input' | 'number' | 'select' | 'date' | 'check';
 
-export interface EditableConfig {
+export interface EditableConfig<T = never> {
   type: EditType;
+  /**
+   * 행별 잠금 — true 를 돌려주면 그 행의 이 칸은 편집하지 않고 값만 보인다.
+   * 예: 기존 행의 키 칸 잠금 `disabled: (_row, isNew) => !isNew` (새로 추가한 행만 입력)
+   */
+  disabled?: (row: T, isNew: boolean) => boolean;
+  /** 잠긴 칸에 마우스를 올렸을 때 안내(title) */
+  disabledTitle?: string;
   /** select 옵션 */
   options?: { label: ReactNode; value: string | number }[];
   rules?: Rule[];
@@ -25,7 +32,7 @@ export interface EditableConfig {
 
 /** 편집 컬럼 정의 — antd 컬럼 + editable */
 export interface EditableColumn<T> extends ColumnType<T> {
-  editable?: EditableConfig;
+  editable?: EditableConfig<T>;
 }
 
 export interface EditableChanges<T> {
@@ -54,6 +61,14 @@ export interface EditableGridProps<T extends object> {
   /** 저장 — 검증 통과 시 호출. 지정 시 [저장] 버튼 표시 */
   onSave?: (changes: EditableChanges<T>) => void | Promise<void>;
   readOnly?: boolean;
+  /** 툴바 버튼·편집 권한(기본 모두 true, readOnly 가 우선). 화면은 usePermission 값을 넘긴다 — 예 canAdd={perm.canReg} */
+  canAdd?: boolean;
+  /** 기존 행 셀 편집(수정) 가능 — false 면 기존 행은 값만 보인다(추가 행은 canAdd 로 편집) */
+  canUpdate?: boolean;
+  /** [행삭제]·행 체크 가능 */
+  canDelete?: boolean;
+  /** [저장] 가능 */
+  canSave?: boolean;
   /** 새 행 기본값 */
   newRow?: () => Partial<T>;
   grade?: GridGrade;
@@ -99,7 +114,7 @@ const display = <T,>(c: EditableColumn<T>, v: unknown, row: T, i: number): React
 };
 
 /** 편집 컨트롤 */
-const editor = (ed: EditableConfig, label: string): ReactNode => {
+const editor = <T,>(ed: EditableConfig<T>, label: string): ReactNode => {
   switch (ed.type) {
     case 'number':
       return <InputNumber size="small" style={{ width: '100%' }} aria-label={label} placeholder={ed.placeholder} />;
@@ -115,7 +130,7 @@ const editor = (ed: EditableConfig, label: string): ReactNode => {
 };
 
 /** 컨트롤 ↔ 저장값 변환(Form.Item props) */
-const itemProps = (ed: EditableConfig) => {
+const itemProps = <T,>(ed: EditableConfig<T>) => {
   if (ed.type === 'date') {
     const fmt = ed.valueFormat ?? YMD;
     const parse = (v: unknown): Dayjs | null => (fmt === YMD ? fromYmd(String(v)) ?? null : dayjs(String(v), fmt));
@@ -139,9 +154,10 @@ const itemProps = (ed: EditableConfig) => {
  *  - 그리드당 Form 1개, 셀마다 Form.Item(name=[행키, 필드])
  *  - 변경 셀 'cell-dirty', 추가 행 'row-added', 삭제 행 'row-deleted'(취소선)
  *  - ref 로 getChanges/validate/reset 제공, [행추가/행삭제/저장/취소] 툴바 내장
+ *  - 행별 잠금 `editable.disabled(row, isNew)`(예: 기존 행 키 칸), 버튼별 권한 `canAdd`·`canUpdate`·`canDelete`·`canSave`
  */
 export function EditableGrid<T extends object>({
-  columns, rows, rowKey, ref, onSave, readOnly = false, newRow, grade = 'G2', height, loading, toolbar = true, toolbarExtra, className,
+  columns, rows, rowKey, ref, onSave, readOnly = false, canAdd = true, canUpdate = true, canDelete = true, canSave = true, newRow, grade = 'G2', height, loading, toolbar = true, toolbarExtra, className,
 }: EditableGridProps<T>) {
   const [form] = Form.useForm<Values>();
   const keyOf = (r: T): string => (typeof rowKey === 'function' ? rowKey(r) : String(r[rowKey]));
@@ -233,6 +249,12 @@ export function EditableGrid<T extends object>({
     }
   };
 
+  /** 이 행의 이 칸을 편집하나 — 추가 행은 canAdd, 기존 행은 canUpdate, 그다음 칸의 disabled(row, isNew) */
+  const cellEditable = (ed: EditableConfig<T>, e: Entry<T>): boolean => {
+    if (e.added ? !canAdd : !canUpdate) return false;
+    return !ed.disabled?.(e.row, e.added);
+  };
+
   useImperativeHandle(ref, () => ({ getChanges: computeChanges, validate, reset, addRow, hasChanges: () => changed }));
 
   const tableCols = columns.map((c, ci): ColumnType<Entry<T>> => {
@@ -246,10 +268,15 @@ export function EditableGrid<T extends object>({
       onCell: (e, i) => {
         const base = onCell?.(e.row, i) ?? {};
         const isDirty = !e.deleted && dirty[e.key]?.includes(field);
-        return { ...base, className: [base.className, isDirty ? 'cell-dirty' : ''].filter(Boolean).join(' ') || undefined };
+        const locked = !!editable && !readOnly && !e.deleted && !cellEditable(editable, e);
+        return {
+          ...base,
+          title: locked && editable?.disabledTitle ? editable.disabledTitle : base.title,
+          className: [base.className, isDirty ? 'cell-dirty' : '', locked ? 'cell-locked' : ''].filter(Boolean).join(' ') || undefined,
+        };
       },
       render: (_: unknown, e: Entry<T>, i: number) => {
-        if (editable && !readOnly && !e.deleted) {
+        if (editable && !readOnly && !e.deleted && cellEditable(editable, e)) {
           return (
             <Form.Item name={[e.key, field]} rules={editable.rules} valuePropName={editable.type === 'check' ? 'checked' : 'value'} style={{ margin: 0 }} {...itemProps(editable)}>
               {editor(editable, label)}
@@ -262,7 +289,8 @@ export function EditableGrid<T extends object>({
     };
   });
 
-  const totalWidth = sumWidth(columns as never) + (readOnly ? 0 : 40);
+  const selectable = !readOnly && canDelete;
+  const totalWidth = sumWidth(columns as never) + (selectable ? 40 : 0);
   const scroll = { x: grade === 'G1' ? undefined : totalWidth, y: height };
 
   return (
@@ -280,14 +308,14 @@ export function EditableGrid<T extends object>({
           </span>
           <span className="flex">
             {toolbarExtra}
-            <Button size="small" onClick={() => addRow()} disabled={readOnly}>
+            <Button size="small" onClick={() => addRow()} disabled={readOnly || !canAdd}>
               행추가
             </Button>
-            <Button size="small" onClick={toggleDelete} disabled={readOnly || selected.length === 0}>
+            <Button size="small" onClick={toggleDelete} disabled={readOnly || !canDelete || selected.length === 0}>
               행삭제
             </Button>
             {onSave && (
-              <Button size="small" type="primary" onClick={() => void save()} loading={saving} disabled={readOnly || !changed}>
+              <Button size="small" type="primary" onClick={() => void save()} loading={saving} disabled={readOnly || !canSave || !changed}>
                 저장
               </Button>
             )}
@@ -322,7 +350,7 @@ export function EditableGrid<T extends object>({
           pagination={false}
           scroll={scroll}
           tableLayout={grade === 'G1' ? 'auto' : 'fixed'}
-          rowSelection={readOnly ? undefined : { selectedRowKeys: selected, onChange: setSelected, columnWidth: 40 }}
+          rowSelection={selectable ? { selectedRowKeys: selected, onChange: setSelected, columnWidth: 40 } : undefined}
           rowClassName={(e) => (e.deleted ? 'row-deleted' : e.added ? 'row-added' : '')}
         />
       </Form>

@@ -3,8 +3,8 @@ import type { ScreenKey } from '@/screens/screenIds';
 
 export const SCREENS: { key: ScreenKey; path: string; title: string; search?: boolean; wait?: string; prefill?: { placeholder: RegExp; value: string }[] }[] = [
   { key: 'home', path: '/home', title: '홈', wait: '.home-card' },
-  { key: 'sample.commonModules', path: '/sample/common-modules', title: '공통 모듈' },
-  { key: 'sample.notice', path: '/sample/notice', title: '공지사항' },
-  { key: 'sample.mcnInfo', path: '/sample/mcn-info', title: '기기정보' },
-  { key: 'sample.mcnModel', path: '/sample/mcn-model', title: '기기모델코드' },
+  { key: 'sample.commonModules', path: '/sample/common-modules', title: '공통 모듈', wait: '.ant-tabs-tab-active' },
+  { key: 'sample.notice', path: '/sample/notice', title: '공지사항', search: true },
+  { key: 'sample.mcnInfo', path: '/sample/mcn-info', title: '기기정보', search: true },
+  { key: 'sample.mcnModel', path: '/sample/mcn-model', title: '기기모델코드', search: true },
 ];

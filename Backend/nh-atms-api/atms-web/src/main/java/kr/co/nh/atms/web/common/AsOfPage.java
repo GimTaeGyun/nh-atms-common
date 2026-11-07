@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** `{asOf, page}` 래퍼 (cash/status, cash/fx/verify 등). summary 가 있으면 {@link AsOfPageSummary}. */
+/** `{asOf, page}` 래퍼 — 기준시각(asOf)이 있는 페이징 목록. 요약이 함께 있으면 {@link AsOfPageSummary}. */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MenuNode } from '@/types/menu';
 import { findMenuByScreen, flattenScreens, resolveMenus, topNodes, toTree } from '../useNavStore';
+import { menuSourceOf } from '@/config/env';
 
 const node = (p: Partial<MenuNode> & Pick<MenuNode, 'menuId' | 'menuNm'>): MenuNode => ({
   parentMenuId: 'ROOT',
@@ -54,9 +55,27 @@ describe('toTree / resolveMenus', () => {
     expect(keys(r.menus)).toEqual(['sample.commonModules', 'sample.notice', 'sample.mcnInfo', 'sample.mcnModel']);
   });
 
+  it('내장 시드 권한: 기본(목 모드 아님)은 조회만 Y, 목 모드("all")는 5개 모두 Y', () => {
+    const qry = flattenScreens(resolveMenus(noPathTree, 'auto').menus);
+    expect(qry.every((n) => n.qryRolYn === 'Y' && n.regRolYn === 'N' && n.updRolYn === 'N' && n.delRolYn === 'N' && n.exeRolYn === 'N')).toBe(true);
+    const all = flattenScreens(resolveMenus(noPathTree, 'static', 'all').menus);
+    expect(all.every((n) => n.regRolYn === 'Y' && n.delRolYn === 'Y' && n.exeRolYn === 'Y')).toBe(true);
+  });
+
   it('api: 화면이 없어도 응답 그대로, static: 시드만', () => {
     expect(resolveMenus(noPathTree, 'api')).toMatchObject({ source: 'api' });
     expect(keys(resolveMenus(noPathTree, 'api').menus)).toEqual([]);
     expect(resolveMenus([], 'static').source).toBe('static');
+  });
+});
+
+describe('menuSourceOf — 운영 빌드는 항상 api', () => {
+  it('production 이면 값과 상관없이 api, 그 밖은 VITE_MENU_SOURCE(없으면 auto)', () => {
+    expect(menuSourceOf('production', 'auto')).toBe('api');
+    expect(menuSourceOf('production', 'static')).toBe('api');
+    expect(menuSourceOf('development', undefined)).toBe('auto');
+    expect(menuSourceOf('development', 'static')).toBe('static');
+    expect(menuSourceOf('mock', 'api')).toBe('api');
+    expect(menuSourceOf('mock', 'zzz')).toBe('auto');
   });
 });

@@ -6,7 +6,7 @@
 db/
 ├─ check/   읽기 전용 확인 조회 — 먼저 돌린다
 │   ├─ 01_exists.sql       15개 TB_ 테이블이 개발 DB 에 있나(내 스키마·다른 스키마·동의어)
-│   ├─ 02_columns.sql      USER_TAB_COLUMNS 컬럼·타입·NULL·PK 순서 목록 → db/ddl 과 비교
+│   ├─ 02_columns.sql      USER_/ALL_TAB_COLUMNS 컬럼·타입·NULL·PK 순서 목록(OWNER·동의어 포함) → db/ddl 과 비교
 │   └─ 03_seed_status.sql  시드가 들어갔나(5 / 15 / 5)
 ├─ ddl/     참고용 DDL (생성물, 손으로 안 고침, 그냥 돌리지 않음) — ddl/README.md
 │   ├─ TB_*.sql            15개

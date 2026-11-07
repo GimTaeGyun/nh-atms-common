@@ -11,6 +11,7 @@
 .editable-grid .ant-form-item { margin: 0; }
 .editable-grid .ant-form-item-explain { font-size: 11px; white-space: normal; }
 .editable-grid .ant-table-tbody > tr > td.cell-dirty { background: var(--warning-bg); box-shadow: inset 3px 0 0 var(--warning); }
+.editable-grid .ant-table-tbody > tr > td.cell-locked { background: var(--bg-subtle); color: var(--text-secondary); }
 .editable-grid .ant-table-tbody > tr.row-added > td { background: var(--info-bg); }
 .editable-grid .ant-table-tbody > tr.row-deleted > td { background: var(--neutral-bg); color: var(--text-muted); text-decoration: line-through; }
 

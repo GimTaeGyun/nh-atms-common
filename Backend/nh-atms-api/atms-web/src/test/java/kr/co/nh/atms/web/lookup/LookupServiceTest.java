@@ -18,7 +18,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/** 공통 조회 규칙 — LKP_001·LKP_002·사무소 필수(V001_20)·없음 404·휴일 기간·기기사 원천 */
+/** 공통 조회 규칙 — LKP_001·LKP_002·사무소 필수(V001_20)·없음 404·휴일 기간·기기사 원천·기종 */
 class LookupServiceTest {
 
     private final LookupMapper mapper = mock(LookupMapper.class);
@@ -51,6 +51,14 @@ class LookupServiceTest {
         assertThatThrownBy(() -> service.corners(" ")).satisfies(t -> assertThat(code(t)).isEqualTo("V001_20"));
         service.machines(" 000080 ", "", "01");
         verify(mapper).selectMachines("000080", null, "01");
+    }
+
+    @Test
+    void srcsFilterByVendorOnlyWhenGiven() {
+        service.srcs(" ");
+        verify(mapper).selectSrcs(null);
+        service.srcs(" 01 ");
+        verify(mapper).selectSrcs("01");
     }
 
     @Test

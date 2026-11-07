@@ -77,7 +77,7 @@ export const ApproverKeyInModal = ({ open, onCancel, onApprove, onReject, title 
     );
 
   return (
-    <Modal open={open} title={title} onCancel={cancel} footer={footer} destroyOnHidden maskClosable={false}>
+    <Modal open={open} title={title} onCancel={cancel} footer={footer} destroyOnHidden mask={{ closable: false }}>
       {target && <div className="panel" style={{ padding: 12, marginBottom: 12 }}>{target}</div>}
       <Form form={form} layout="vertical" onFinish={finish} preserve={false} autoComplete="off">
         {mode === 'approve' ? (

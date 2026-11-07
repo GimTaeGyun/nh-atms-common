@@ -79,6 +79,31 @@ describe('EditableGrid', () => {
     expect(screen.getByText('현금')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '행추가' })).toBeDisabled();
   });
+
+  it('행별 잠금 editable.disabled(row, isNew) — 기존 행 키 칸은 값만, 새 행은 입력', async () => {
+    const cols: EditableColumn<Code>[] = [
+      { title: '코드', dataIndex: 'id', width: 80, editable: { type: 'input', disabled: (_r, isNew) => !isNew, disabledTitle: '키는 바꿀 수 없습니다.' } },
+      codeCols[1],
+    ];
+    const { container } = render(<ConfigProvider><EditableGrid<Code> columns={cols} rows={codes} rowKey="id" /></ConfigProvider>);
+    const locked = rowOf('A1').querySelector('td.cell-locked') as HTMLElement;
+    expect(locked).toHaveAttribute('title', '키는 바꿀 수 없습니다.');
+    expect(within(rowOf('A1')).queryByLabelText('코드')).toBeNull();
+    expect(within(rowOf('A1')).getByDisplayValue('현금')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '행추가' }));
+    const added = await waitFor(() => container.querySelector('tr.row-added') as HTMLElement);
+    expect(within(added).getByLabelText('코드')).toBeInTheDocument();
+  });
+
+  it('버튼별 권한 canAdd·canUpdate·canDelete·canSave', () => {
+    render(<ConfigProvider><EditableGrid<Code> columns={codeCols} rows={codes} rowKey="id" onSave={vi.fn()} canAdd={false} canUpdate={false} canDelete={false} canSave={false} /></ConfigProvider>);
+    expect(screen.getByRole('button', { name: '행추가' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '행삭제' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '저장' })).toBeDisabled();
+    expect(screen.queryByDisplayValue('현금')).toBeNull(); // 기존 행 수정 불가 → 값만
+    expect(screen.queryAllByRole('checkbox', { name: /select/i })).toHaveLength(0);
+    expect(rowOf('현금').querySelector('.ant-table-selection-column')).toBeNull();
+  });
 });
 
 describe('MatrixGrid', () => {

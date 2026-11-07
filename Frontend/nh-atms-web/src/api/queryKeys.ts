@@ -5,9 +5,15 @@
 import { lookupKeys } from './endpoints/lookup';
 import { meKeys } from './endpoints/me';
 import { menuKeys } from './endpoints/menu';
+import { noticeKeys } from './endpoints/notice';
+import { mcnInfoKeys } from './endpoints/mcnInfo';
+import { mcnModelKeys } from './endpoints/mcnModel';
 
 export const qk = {
   me: meKeys,
   menu: menuKeys,
   lookup: lookupKeys,
+  notice: noticeKeys,
+  mcnInfo: mcnInfoKeys,
+  mcnModel: mcnModelKeys,
 };

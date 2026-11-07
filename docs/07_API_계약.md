@@ -17,6 +17,8 @@ Audit          { crtDtm?: string; crtCmeno?: string; lschgDtm?: string; lsCmeno?
 - 조회 응답 `message:null`. 쓰기 응답은 코드로 문구(`S002` 등록, `S003` 수정, `S004` 삭제, `S005` {0}건 삭제, `S001` 저장).
 - 요청 헤더 `X-Screen-Key`(화면키), `X-Screen-Name`(encodeURIComponent) — 행위이력·권한 검사용.
 - 권한 부족 403 `SYS_403`, 고정 사용자 문제 401 `ME_001`, 입력 오류 400 `VAL_*`, 없음 404.
+- 견본 표의 "권한" 칸은 서버도 검사한다: 조회 GET 도 `@RequireMenuAuth(need=QRY)`, 쓰기는 REG·UPD·DEL(일괄 저장은 서비스에서 종류별). 공통 조회 `/api/lookup/*`·`/api/me`·`/api/menu/my` 는 검사하지 않는다.
+- 입력 길이: 바이트 상한 칸(공지 제목·내용, 모델명)은 ASCII 1·그 밖 2바이트로 센다(잠정 Q-07, 서버 `DbBytes`·프론트 `utils/rules` `byteLength`/`maxBytes` 한 곳).
 
 ## 1. 나 · 메뉴
 
@@ -57,6 +59,7 @@ MenuNode {
 | `/api/lookup/persons/{perNo}` | | `Person` (없으면 404 `E404`) | 〃 |
 | `/api/lookup/vendors` | | `Vendor[]` | 설계 Q6 (아래) |
 | `/api/lookup/models` | `vendCode?`, `mcnType?` | `Model[]` | TB_CO_MODEL |
+| `/api/lookup/srcs` | `vendCode?` | `Src[]` (`SRC` 순) | TB_NMS_SRC |
 | `/api/lookup/machines` | `ofcCode` 필수(`V001_20`), `vendCode?`, `q?`(기번) | `Machine[]` | TB_MCN_INFO ⟕ TB_SCRT_INST_PST ⟕ TB_NMS_SRC |
 | `/api/lookup/corners` | `ofcCode` 필수 | `Corner[]` | TB_SCRT_INST_PST |
 | `/api/lookup/codes/{codeType}` | | `Code[]` (`USE_YN='Y'`, `SORT_ORD,CODE` 순) | TB_CO_CODE |
@@ -70,6 +73,7 @@ Office  { ofcCode: string; kanm: string | null; sidoCode: string | null; sidoNm:
 Person  { perNo: string; name: string; jikeubName: string | null; samuso: string | null; samusoName: string | null }
 Vendor  { vendCode: string; vendNm: string | null }
 Model   { vendCode: string; mcnType: string; modelCode: string; modelNm: string | null }
+Src     { src: string; srcNm: string | null; vendCode: string | null; komType: string | null }   // 기종(TB_NMS_SRC)
 Machine { ofcCode: string; mcnNo: string; instPstCode: string | null; instPstNm: string | null;
           src: string | null; srcNm: string | null; komType: string | null; vendCode: string | null; useYn: 'Y' | 'N' }
 Corner  { ofcCode: string; instPstCode: string; instPstNm: string | null; useYn: 'Y' | 'N' }
@@ -92,7 +96,7 @@ Holiday { hdayDt: string; dayType: number | null; hdayYn: string | null; closeYn
 | `GET /api/notice/{no}` | `hit?='Y'` 이면 조회수+1 | `Notice` | QRY | 없음 404 `NTC_001` |
 | `POST /api/notice` | `NoticeSave` | `Notice` | REG | `S002` |
 | `PUT /api/notice/{no}` | `NoticeSave` | `Notice` | UPD | `S003` / 없음 `NTC_001` |
-| `POST /api/notice/delete` | `{ nos: number[] }` (1~100건) | `{ count: number }` | DEL | `S005`({0}=count) / 빈 목록 400 `VAL_001` |
+| `POST /api/notice/delete` | `{ nos: number[] }` (1~100건) | `{ count: number }` | DEL | `S005`({0}=count) / 빈 목록 400 `VAL_001` / 지운 건 0 이면 404 `NTC_001` |
 
 ```ts
 NoticeSearch extends PageParams { fromDate?: string; toDate?: string; ofcCode?: string; perNo?: string;
@@ -111,8 +115,8 @@ NoticeSave { subject: string /*필수 ≤200바이트*/; text: string /*필수 �
 | `GET /api/mcn-info` | `McnInfoSearch` (`ofcCode` 필수 `V001_20`) | `PageResult<McnInfo>` | QRY | — |
 | `GET /api/mcn-info/{ofcCode}/{mcnNo}` | | `McnInfo` | QRY | 없음 404 `MCN_001` |
 | `POST /api/mcn-info` | `McnInfoSave` | `McnInfo` | REG | `S002` / 중복 400 `MCN_002` |
-| `PUT /api/mcn-info/{ofcCode}/{mcnNo}` | `McnInfoSave`(키 무시) | `McnInfo` | UPD | `S003` / 없음 `MCN_001` |
-| `DELETE /api/mcn-info/{ofcCode}/{mcnNo}` | | `null` | DEL | `S004` (USE_YN='N', 논리 삭제) |
+| `PUT /api/mcn-info/{ofcCode}/{mcnNo}` | `McnInfoSave`(키 무시) | `McnInfo` | UPD | `S003` / 없음 404 `MCN_001` |
+| `DELETE /api/mcn-info/{ofcCode}/{mcnNo}` | | `null` | DEL | `S004` (USE_YN='N', 논리 삭제) / 없음 404 `MCN_001` |
 
 ```ts
 McnInfoSearch extends PageParams { ofcCode: string; mcnNo?: string; vendCode?: string; komType?: string;
@@ -130,7 +134,7 @@ McnInfoSave { ofcCode: string; mcnNo: string /*숫자 3자리*/; instPstCode?: s
 | 메서드 경로 | 요청 | 응답 data | 권한 | 문구 |
 |---|---|---|---|---|
 | `GET /api/mcn-model` | `vendCode?`, `mcnType?`, `q?`(모델코드·모델명) | `McnModel[]` | QRY | — |
-| `POST /api/mcn-model/batch` | `BatchChanges<McnModel>` | `{ added: number; updated: number; deleted: number }` | added→REG, updated→UPD, deleted→DEL (있는 종류만 검사) | `S001` / 중복 `MDL_002`({0}) / 없음 `MDL_001`({0}) |
+| `POST /api/mcn-model/batch` | `BatchChanges<McnModel>` | `{ added: number; updated: number; deleted: number }` | added→REG, updated→UPD, deleted→DEL (있는 종류만 검사) | `S001` / 중복 400 `MDL_002`({0}) / 없음 404 `MDL_001`({0}) |
 
 ```ts
 McnModel extends Audit { vendCode: string; vendNm?: string | null; mcnType: string; modelCode: string; modelNm: string | null }
@@ -151,3 +155,4 @@ McnModel extends Audit { vendCode: string; vendNm?: string | null; mcnType: stri
 | `MDL_002` | E | 이미 등록된 모델코드입니다. ({0}) |
 
 원본에서 그대로 쓰는 코드: `0000`, `S001~S005`, `SYS_401/403/404/405/500`, `VAL_001~004`, `V001_20`, `E404`, `NTC_001`.
+단, `SYS_401` 은 코드만 원본이고 문구는 "사용자 확인이 필요합니다." 로 바꿨다(로그인 화면이 없어 "로그인" 말을 쓰지 않음, TSV 주석 참고).

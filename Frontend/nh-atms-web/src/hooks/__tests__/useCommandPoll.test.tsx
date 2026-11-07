@@ -8,7 +8,7 @@ describe('useCommandPoll', () => {
 
   it('발행 → PENDING → RUNNING → DONE 이면 onDone', async () => {
     const seq: CommandStatus<string>[] = [{ state: 'PENDING' }, { state: 'RUNNING', message: '실행 중' }, { state: 'DONE', message: '정상', result: 'OK' }];
-    const issue = vi.fn(async (_: { termId: string }) => ({ cmdId: 'C1' }));
+    const issue = vi.fn(async (_: { mcnNo: string }) => ({ cmdId: 'C1' }));
     const status = vi.fn(async () => seq.shift()!);
     const onDone = vi.fn();
     const onFail = vi.fn();
@@ -16,11 +16,11 @@ describe('useCommandPoll', () => {
 
     let outcome: Promise<unknown> | undefined;
     act(() => {
-      outcome = result.current.run({ termId: '001' });
+      outcome = result.current.run({ mcnNo: '001' });
     });
     expect(result.current.running).toBe(true);
     await act(() => vi.advanceTimersByTimeAsync(0));
-    expect(issue).toHaveBeenCalledWith({ termId: '001' });
+    expect(issue).toHaveBeenCalledWith({ mcnNo: '001' });
     expect(result.current.cmdId).toBe('C1');
     expect(result.current.state).toBe('PENDING');
 

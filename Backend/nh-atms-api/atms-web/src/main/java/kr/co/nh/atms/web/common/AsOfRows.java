@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/** `{asOf, rows}` 래퍼 — 페이징 없는 목록 (corner, cash/fx, reconcile) */
+/** `{asOf, rows}` 래퍼 — 기준시각이 있는 페이징 없는 목록 */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

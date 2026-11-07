@@ -24,12 +24,26 @@ class MenuAuthServiceTest {
         AuthTestSupport.logout();
     }
 
+    /**
+     * 화면키 → 메뉴경로 공통 예시 표 — 프론트 src/screens/__tests__/registry.test.ts 의 MENU_PATH_EXAMPLES 와 **같은 표**.
+     * 한쪽 규칙·표를 바꾸면 다른 쪽도 같이 바꾼다(잠정 Q-05).
+     */
+    static final String[][] MENU_PATH_EXAMPLES = {
+            {"sample.notice", "/sample/notice"},
+            {"sample.mcnInfo", "/sample/mcn-info"},
+            {"sample.mcnModel", "/sample/mcn-model"},
+            {"sample.commonModules", "/sample/common-modules"},
+            {"popup.officeSearch", "/popup/office-search"},
+            {"a.mcnABC", "/a/mcn-abc"},
+            {"a.mcn2Info", "/a/mcn2-info"},
+            {"home", "/home"},
+    };
+
     @Test
     void menuPathFromScreenKey() {
-        assertThat(MenuAuthService.menuPathOf("sample.mcnInfo")).isEqualTo("/sample/mcn-info");
-        assertThat(MenuAuthService.menuPathOf("sample.notice")).isEqualTo("/sample/notice");
-        assertThat(MenuAuthService.menuPathOf("sample.commonModules")).isEqualTo("/sample/common-modules");
-        assertThat(MenuAuthService.menuPathOf("popup.officeSearch")).isEqualTo("/popup/office-search");
+        for (String[] e : MENU_PATH_EXAMPLES) {
+            assertThat(MenuAuthService.menuPathOf(e[0])).as(e[0]).isEqualTo(e[1]);
+        }
     }
 
     @Test

@@ -41,6 +41,25 @@ export const when = (cond: boolean, ...rules: Rule[]): Rule[] => (cond ? rules :
 /** 글자 수 상한 */
 export const maxLen = (n: number): Rule => ({ type: 'string', max: n, message: VMSG.maxLength(n) });
 
+/**
+ * DB 저장 바이트 수 — 서버 공통 `DbBytes.length` 와 같은 규칙.
+ * 잠정 Q-07: 은행 DB 문자셋 KO16MSWIN949 기준 ASCII 1바이트, 그 밖(한글 등) 2바이트. 서로게이트 쌍(이모지)은 글자 하나 = 2바이트.
+ * 컬럼 길이가 BYTE 인지 CHAR 인지 정본에 없어 BYTE 로 가정 — 현업 답이 오면 여기와 서버 DbBytes 만 고친다.
+ */
+export const byteLength = (s: string | null | undefined): number => {
+  let n = 0;
+  for (const ch of s ?? '') n += (ch.codePointAt(0) ?? 0) < 0x80 ? 1 : 2;
+  return n;
+};
+
+/** 바이트 상한(VARCHAR2(n) 칸에 한글을 넣을 때). 빈값은 통과 — 필수는 req 로 따로 */
+export const maxBytes = (n: number): Rule => ({
+  validator: (_r, v?: string | null) => (byteLength(v) > n ? fail(VMSG.maxBytes(n)) : ok()),
+});
+
+/** Input·TextArea 의 `count` — 글자 수 대신 바이트로 세어 'n / max' 표시(넘으면 빨갛게, 잘라내지 않음). 예: `<Input count={byteCount(200)} />` */
+export const byteCount = (max: number) => ({ show: true, max, strategy: byteLength });
+
 /** 숫자 정확히 n자리(코드·기번 등). 빈값은 통과 — 필수는 req 로 따로 */
 export const digits = (n: number): Rule => ({ pattern: new RegExp(`^\\d{${n}}$`), message: VMSG.digits(n) });
 

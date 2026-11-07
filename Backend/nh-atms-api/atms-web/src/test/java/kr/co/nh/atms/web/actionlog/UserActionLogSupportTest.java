@@ -10,20 +10,20 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** 7211 행위 이력 — 수행작업 판정·민감정보 마스킹·바이트 절단(설계 19 문서 §3) */
+/** 사용자 행위이력 — 수행작업 판정·민감정보 마스킹·바이트 절단 (nh-atms 19_사용자행위이력_설계 §3) */
 class UserActionLogSupportTest {
 
     @Test
     void actionIsDerivedFromMethodUriAndHandlerName() {
-        assertThat(UserActionLogSupport.deriveAction("GET", "/api/sys/err-msg", "list")).isEqualTo("SELECT");
-        assertThat(UserActionLogSupport.deriveAction("POST", "/api/sys/err-msg", "create")).isEqualTo("INSERT");
-        assertThat(UserActionLogSupport.deriveAction("PUT", "/api/sys/err-msg/A/1", "update")).isEqualTo("UPDATE");
-        assertThat(UserActionLogSupport.deriveAction("POST", "/api/sys/err-msg/delete", "remove")).isEqualTo("DELETE");
-        assertThat(UserActionLogSupport.deriveAction("DELETE", "/api/user/u1", "deleteUser")).isEqualTo("DELETE");
-        assertThat(UserActionLogSupport.deriveAction("POST", "/api/atm-vendor/batch", "saveBatch")).isEqualTo("INSERT");
-        assertThat(UserActionLogSupport.deriveAction("GET", "/api/journal/excel", "list")).isEqualTo("EXPORT");
-        assertThat(UserActionLogSupport.deriveAction("POST", "/api/stat/x", "downloadReport")).isEqualTo("EXPORT");
-        assertThat(UserActionLogSupport.deriveAction("POST", "/api/user/u1/password", "changePassword")).isEqualTo("UPDATE");
+        assertThat(UserActionLogSupport.deriveAction("GET", "/api/notice", "list")).isEqualTo("SELECT");
+        assertThat(UserActionLogSupport.deriveAction("POST", "/api/notice", "create")).isEqualTo("INSERT");
+        assertThat(UserActionLogSupport.deriveAction("PUT", "/api/notice/1", "update")).isEqualTo("UPDATE");
+        assertThat(UserActionLogSupport.deriveAction("POST", "/api/notice/delete", "remove")).isEqualTo("DELETE");
+        assertThat(UserActionLogSupport.deriveAction("DELETE", "/api/mcn-info/000080/001", "delete")).isEqualTo("DELETE");
+        assertThat(UserActionLogSupport.deriveAction("POST", "/api/mcn-model/batch", "saveBatch")).isEqualTo("INSERT");
+        assertThat(UserActionLogSupport.deriveAction("GET", "/api/notice/excel", "list")).isEqualTo("EXPORT");
+        assertThat(UserActionLogSupport.deriveAction("POST", "/api/notice/x", "downloadReport")).isEqualTo("EXPORT");
+        assertThat(UserActionLogSupport.deriveAction("POST", "/api/mcn-info/000080/001/use-yn", "changeUseYn")).isEqualTo("UPDATE");
     }
 
     @Test
@@ -35,23 +35,23 @@ class UserActionLogSupportTest {
         assertThat(UserActionLogSupport.maskValue("cardNo", "1234567890123456")).isEqualTo("123456******3456");
         assertThat(UserActionLogSupport.maskValue("cellPhoneNo", "01012345678")).isEqualTo("010****5678");
         assertThat(UserActionLogSupport.maskValue("personNo", "9001011234567")).isEqualTo("900101*******");
-        assertThat(UserActionLogSupport.maskValue("officeCd", "000080")).isEqualTo("000080");
+        assertThat(UserActionLogSupport.maskValue("ofcCode", "000080")).isEqualTo("000080");
     }
 
     @Test
     void paramJsonCombinesQueryAndMaskedBody() throws Exception {
         ObjectMapper om = new ObjectMapper();
         Map<String, String[]> query = new LinkedHashMap<>();
-        query.put("officeCd", new String[]{"000080"});
+        query.put("ofcCode", new String[]{"000080"});
         query.put("regions", new String[]{"A", "B"});
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("userId", "u1");
+        body.put("perNo", "1234567");
         body.put("password", "secret!");
         body.put("nested", Map.of("cardNo", "1234567890123456"));
 
         String json = UserActionLogSupport.buildParam(om, query, body);
         var tree = om.readTree(json);
-        assertThat(tree.get("query").get("officeCd").asText()).isEqualTo("000080");
+        assertThat(tree.get("query").get("ofcCode").asText()).isEqualTo("000080");
         assertThat(tree.get("query").get("regions")).hasSize(2);
         assertThat(tree.get("body").get("password").asText()).isEqualTo("***");
         assertThat(tree.get("body").get("nested").get("cardNo").asText()).isEqualTo("123456******3456");

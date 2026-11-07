@@ -14,7 +14,7 @@ export const paginate = <T,>(rows: T[], sp: URLSearchParams): PageResult<T> => {
   const page = Math.max(1, num(sp.get('page'), 1));
   const size = Math.max(1, num(sp.get('size'), 20));
   const totalCount = rows.length;
-  return { content: rows.slice((page - 1) * size, page * size), totalCount, page, size, totalPages: Math.max(1, Math.ceil(totalCount / size)) };
+  return { content: rows.slice((page - 1) * size, page * size), totalCount, page, size, totalPages: Math.ceil(totalCount / size) /* 0건이면 0 — 백엔드 PageResult.of 와 같게 */ };
 };
 /** 실서버 느낌의 지연(120~400ms). 고정 지연이 필요하면 msw 의 delay(ms) */
 export const LATENCY = () => delay(Math.round(120 + Math.random() * 280));

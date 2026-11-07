@@ -20,7 +20,7 @@
           LEFT JOIN TB_CO_SIDO S ON S.SIDO_CODE = O.SIDO_CODE
     </sql>
 
-    <select id="selectOffices" resultType="kr.co.nh.atms.web.lookup.dto.Office">
+    <select id="selectOffices" resultType="kr.co.nh.atms.web.lookup.dto.LookupOffice">
         <include refid="officeColumns"/>
         <where>
             <if test="q != null">
@@ -30,13 +30,13 @@
          ORDER BY O.OFC_CODE
     </select>
 
-    <select id="selectOffice" resultType="kr.co.nh.atms.web.lookup.dto.Office">
+    <select id="selectOffice" resultType="kr.co.nh.atms.web.lookup.dto.LookupOffice">
         <include refid="officeColumns"/>
          WHERE O.OFC_CODE = CAST(#{ofcCode} AS CHAR(6))
     </select>
 
     <!-- ── 인원: TB_INSA(PER_NO VARCHAR2(9) PK, SAMUSO VARCHAR2(6), RETIRE_DATE VARCHAR2(14)). 규칙은 LookupRules(잠정) ── -->
-    <select id="selectPersons" resultType="kr.co.nh.atms.web.lookup.dto.Person">
+    <select id="selectPersons" resultType="kr.co.nh.atms.web.lookup.dto.LookupPerson">
         SELECT PER_NO,
                NAME,
                JIKEUB_NAME,
@@ -54,7 +54,7 @@
          FETCH FIRST 200 ROWS ONLY
     </select>
 
-    <select id="selectPerson" resultType="kr.co.nh.atms.web.lookup.dto.Person">
+    <select id="selectPerson" resultType="kr.co.nh.atms.web.lookup.dto.LookupPerson">
         SELECT PER_NO,
                NAME,
                JIKEUB_NAME,
@@ -66,7 +66,7 @@
 
     <!-- ── 기기사(잠정 Q6, LookupRules.vendorCodeType) ── -->
     <!-- 설정된 코드구분이 있을 때: TB_CO_CODE(CODE_TYPE VARCHAR2(10), CODE VARCHAR2(10)) — CODE→vendCode, CODE_NM→vendNm -->
-    <select id="selectVendorsFromCode" resultType="kr.co.nh.atms.web.lookup.dto.Vendor">
+    <select id="selectVendorsFromCode" resultType="kr.co.nh.atms.web.lookup.dto.LookupVendor">
         SELECT CODE    AS VEND_CODE,
                CODE_NM AS VEND_NM
           FROM TB_CO_CODE
@@ -76,7 +76,7 @@
     </select>
 
     <!-- 설정이 없을 때(기본): TB_CO_MODEL·TB_MCN_INFO 의 VEND_CODE(둘 다 VARCHAR2(2)) 값만, 이름 없음 -->
-    <select id="selectVendorsDistinct" resultType="kr.co.nh.atms.web.lookup.dto.Vendor">
+    <select id="selectVendorsDistinct" resultType="kr.co.nh.atms.web.lookup.dto.LookupVendor">
         SELECT VEND_CODE,
                NULL AS VEND_NM
           FROM (SELECT VEND_CODE FROM TB_CO_MODEL
@@ -87,7 +87,7 @@
     </select>
 
     <!-- ── 기기모델: TB_CO_MODEL(VEND_CODE·MCN_TYPE·MODEL_CODE VARCHAR2(2) PK, MODEL_NM) ── -->
-    <select id="selectModels" resultType="kr.co.nh.atms.web.lookup.dto.Model">
+    <select id="selectModels" resultType="kr.co.nh.atms.web.lookup.dto.LookupModel">
         SELECT VEND_CODE,
                MCN_TYPE,
                MODEL_CODE,
@@ -100,12 +100,25 @@
          ORDER BY VEND_CODE, MCN_TYPE, MODEL_CODE
     </select>
 
+    <!-- ── 기종: TB_NMS_SRC(SRC VARCHAR2(2) PK, SRC_NM VARCHAR2(40), VEND_CODE VARCHAR2(2), KOM_TYPE VARCHAR2(5)) -->
+    <select id="selectSrcs" resultType="kr.co.nh.atms.web.lookup.dto.LookupSrc">
+        SELECT SRC,
+               SRC_NM,
+               VEND_CODE,
+               KOM_TYPE
+          FROM TB_NMS_SRC
+        <where>
+            <if test="vendCode != null">VEND_CODE = #{vendCode}</if>
+        </where>
+         ORDER BY SRC
+    </select>
+
     <!--
       ── 기기: TB_MCN_INFO(OFC_CODE CHAR(6)·MCN_NO CHAR(3) PK, INST_PST_CODE CHAR(3), SRC VARCHAR2(2))
                ⟕ TB_SCRT_INST_PST(OFC_CODE CHAR(6)·INST_PST_CODE VARCHAR2(3) PK) — 코너 PK 쪽은 가공하지 않고 기기 쪽 RTRIM
                ⟕ TB_NMS_SRC(SRC VARCHAR2(2) PK, SRC_NM)
     -->
-    <select id="selectMachines" resultType="kr.co.nh.atms.web.lookup.dto.Machine">
+    <select id="selectMachines" resultType="kr.co.nh.atms.web.lookup.dto.LookupMachine">
         SELECT M.OFC_CODE,
                M.MCN_NO,
                RTRIM(M.INST_PST_CODE) AS INST_PST_CODE,
@@ -131,7 +144,7 @@
     </select>
 
     <!-- ── 코너: TB_SCRT_INST_PST(OFC_CODE CHAR(6), INST_PST_CODE VARCHAR2(3), INST_PST_NM, USE_YN CHAR(1)) ── -->
-    <select id="selectCorners" resultType="kr.co.nh.atms.web.lookup.dto.Corner">
+    <select id="selectCorners" resultType="kr.co.nh.atms.web.lookup.dto.LookupCorner">
         SELECT OFC_CODE,
                INST_PST_CODE,
                INST_PST_NM,
@@ -142,7 +155,7 @@
     </select>
 
     <!-- ── 공통코드: TB_CO_CODE(CODE_TYPE·CODE VARCHAR2(10) PK). 사용 중만, SORT_ORD·CODE 순 ── -->
-    <select id="selectCodes" resultType="kr.co.nh.atms.web.lookup.dto.Code">
+    <select id="selectCodes" resultType="kr.co.nh.atms.web.lookup.dto.LookupCode">
         SELECT CODE_TYPE,
                CODE,
                CODE_NM,
@@ -158,14 +171,14 @@
     </select>
 
     <!-- ── 시도·시군: TB_CO_SIDO(SIDO_CODE VARCHAR2(2)), TB_CO_SIGUN(SIDO_CODE VARCHAR2(2)·SIGUN_CODE VARCHAR2(3)) ── -->
-    <select id="selectSido" resultType="kr.co.nh.atms.web.lookup.dto.Sido">
+    <select id="selectSido" resultType="kr.co.nh.atms.web.lookup.dto.LookupSido">
         SELECT SIDO_CODE,
                SIDO_NM
           FROM TB_CO_SIDO
          ORDER BY SIDO_CODE
     </select>
 
-    <select id="selectSigun" resultType="kr.co.nh.atms.web.lookup.dto.Sigun">
+    <select id="selectSigun" resultType="kr.co.nh.atms.web.lookup.dto.LookupSigun">
         SELECT SIDO_CODE,
                SIGUN_CODE,
                SIGUN_NM
@@ -175,7 +188,7 @@
     </select>
 
     <!-- ── 휴일: TB_NMS_HDAY(HDAY_DT CHAR(8) PK, DAY_TYPE NUMBER(1), HDAY_YN·CLOSE_YN CHAR(1)) ── -->
-    <select id="selectHolidays" resultType="kr.co.nh.atms.web.lookup.dto.Holiday">
+    <select id="selectHolidays" resultType="kr.co.nh.atms.web.lookup.dto.LookupHoliday">
         SELECT HDAY_DT,
                DAY_TYPE,
                HDAY_YN,
@@ -188,7 +201,7 @@
     <!-- ── 있는 값 목록(distinct) — LookupService.DISTINCT 허용 목록과 1:1 ── -->
 
     <!-- mcn-kom-type → TB_MCN_INFO.KOM_TYPE VARCHAR2(5) -->
-    <select id="selectDistinctMcnKomType" resultType="kr.co.nh.atms.web.lookup.dto.DistinctValue">
+    <select id="selectDistinctMcnKomType" resultType="kr.co.nh.atms.web.lookup.dto.LookupDistinctValue">
         SELECT DISTINCT KOM_TYPE AS VALUE
           FROM TB_MCN_INFO
          WHERE TRIM(KOM_TYPE) IS NOT NULL
@@ -196,7 +209,7 @@
     </select>
 
     <!-- mcn-op-type → TB_MCN_INFO.OP_TYPE CHAR(1) -->
-    <select id="selectDistinctMcnOpType" resultType="kr.co.nh.atms.web.lookup.dto.DistinctValue">
+    <select id="selectDistinctMcnOpType" resultType="kr.co.nh.atms.web.lookup.dto.LookupDistinctValue">
         SELECT DISTINCT RTRIM(OP_TYPE) AS VALUE
           FROM TB_MCN_INFO
          WHERE TRIM(OP_TYPE) IS NOT NULL
@@ -204,7 +217,7 @@
     </select>
 
     <!-- mcn-inout-type → TB_MCN_INFO.INOUT_TYPE CHAR(1) -->
-    <select id="selectDistinctMcnInoutType" resultType="kr.co.nh.atms.web.lookup.dto.DistinctValue">
+    <select id="selectDistinctMcnInoutType" resultType="kr.co.nh.atms.web.lookup.dto.LookupDistinctValue">
         SELECT DISTINCT RTRIM(INOUT_TYPE) AS VALUE
           FROM TB_MCN_INFO
          WHERE TRIM(INOUT_TYPE) IS NOT NULL
@@ -212,7 +225,7 @@
     </select>
 
     <!-- mcn-cnr-pst-spec → TB_MCN_INFO.CNR_PST_SPEC_CODE CHAR(2) -->
-    <select id="selectDistinctMcnCnrPstSpec" resultType="kr.co.nh.atms.web.lookup.dto.DistinctValue">
+    <select id="selectDistinctMcnCnrPstSpec" resultType="kr.co.nh.atms.web.lookup.dto.LookupDistinctValue">
         SELECT DISTINCT RTRIM(CNR_PST_SPEC_CODE) AS VALUE
           FROM TB_MCN_INFO
          WHERE TRIM(CNR_PST_SPEC_CODE) IS NOT NULL
@@ -220,7 +233,7 @@
     </select>
 
     <!-- mcn-vend-code → TB_MCN_INFO.VEND_CODE VARCHAR2(2) -->
-    <select id="selectDistinctMcnVendCode" resultType="kr.co.nh.atms.web.lookup.dto.DistinctValue">
+    <select id="selectDistinctMcnVendCode" resultType="kr.co.nh.atms.web.lookup.dto.LookupDistinctValue">
         SELECT DISTINCT VEND_CODE AS VALUE
           FROM TB_MCN_INFO
          WHERE TRIM(VEND_CODE) IS NOT NULL
@@ -228,7 +241,7 @@
     </select>
 
     <!-- model-mcn-type → TB_CO_MODEL.MCN_TYPE VARCHAR2(2) -->
-    <select id="selectDistinctModelMcnType" resultType="kr.co.nh.atms.web.lookup.dto.DistinctValue">
+    <select id="selectDistinctModelMcnType" resultType="kr.co.nh.atms.web.lookup.dto.LookupDistinctValue">
         SELECT DISTINCT MCN_TYPE AS VALUE
           FROM TB_CO_MODEL
          WHERE TRIM(MCN_TYPE) IS NOT NULL

@@ -26,6 +26,21 @@ export interface PageParams {
   sort?: string;
 }
 
+/** 일괄 저장 요청 (API 계약 §0, 백엔드 web/common BatchChanges). EditableGrid 의 getChanges() 결과와 같은 모양 */
+export interface BatchChanges<T> {
+  added: T[];
+  updated: T[];
+  deleted: T[];
+}
+
+/** 감사 4컬럼(API 계약 §0, 읽기 전용) — CRT_DTM·CRT_CMENO·LSCHG_DTM·LS_CMENO. 일시는 YYYYMMDDHH24MISS. 서버가 채운다(화면은 보내지 않음) */
+export interface Audit {
+  crtDtm?: string;
+  crtCmeno?: string;
+  lschgDtm?: string;
+  lsCmeno?: string;
+}
+
 /** 날짜 문자열 규격: YYYYMMDD / HHMMSS (백엔드·AS-IS 전문 포맷) */
 export type Ymd = string;
 export type Hms = string;

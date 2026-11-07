@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** `{kpi, page}` 래퍼 (outsrc/atm-status, std/sample 은 asOf 포함 → 자체 DTO) */
+/** `{kpi, page}` 래퍼 — 요약 지표(kpi)와 목록 한 쪽(page)을 함께 내려줄 때. 기준시각(asOf)까지 필요하면 AsOfPageSummary */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

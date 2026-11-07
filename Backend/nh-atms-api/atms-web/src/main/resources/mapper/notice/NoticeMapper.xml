@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+  공지사항 견본(sample.notice) — API 계약 §3, 설계 §8.2
+  TB_NOTICE: NO NUMBER(22) PK, OFC_CODE CHAR(6), SUBJECT VARCHAR2(200), TEXT VARCHAR2(4000), VISIT NUMBER(22),
+             NAME VARCHAR2(10), PER_NO VARCHAR2(9), WRT_DATE DATE(원본이 정한 DATE), 감사 4컬럼
+  - SQL 은 대문자, 컬럼은 정본 이름 그대로(필드는 camelCase 자동 변환). ${} 금지
+  - CHAR 비교는 CAST(#{v} AS CHAR(n)). 사무소명 조인은 양쪽 모두 OFC_CODE CHAR(6) 이라 변환 없이 같음 비교(21지침 §5)
+  - WRT_DATE 는 DATE → 응답은 TO_CHAR(WRT_DATE,'YYYYMMDD') AS WRT_DATE, 기간은 TO_DATE 범위(인덱스 쪽 컬럼은 가공하지 않음)
+  - 감사 컬럼은 #{crtDtm} 등을 쓰기만 한다(AuditInterceptor 가 채움)
+-->
+<mapper namespace="kr.co.nh.atms.web.notice.mapper.NoticeMapper">
+
+    <!-- 조회조건(서비스 NoticeService.normalize 가 정리한 값). field 는 SUBJECT·TEXT·NAME 중 하나이거나 null -->
+    <sql id="searchWhere">
+        <where>
+            <if test="fromDate != null">
+                AND N.WRT_DATE &gt;= TO_DATE(#{fromDate}, 'YYYYMMDD')
+            </if>
+            <if test="toDate != null">
+                AND N.WRT_DATE &lt; TO_DATE(#{toDate}, 'YYYYMMDD') + 1
+            </if>
+            <if test="ofcCode != null">
+                AND N.OFC_CODE = CAST(#{ofcCode} AS CHAR(6))
+            </if>
+            <if test="perNo != null">
+                AND N.PER_NO = #{perNo}
+            </if>
+            <if test="field != null and keyword != null">
+                <choose>
+                    <when test='field == "SUBJECT"'>
+                        AND N.SUBJECT LIKE '%' || #{keyword} || '%'
+                    </when>
+                    <when test='field == "TEXT"'>
+                        AND N.TEXT LIKE '%' || #{keyword} || '%'
+                    </when>
+                    <when test='field == "NAME"'>
+                        AND N.NAME LIKE '%' || #{keyword} || '%'
+                    </when>
+                </choose>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectList" resultType="kr.co.nh.atms.web.notice.dto.Notice">
+        SELECT N.NO,
+               N.OFC_CODE,
+               O.KANM,
+               N.SUBJECT,
+               N.VISIT,
+               N.NAME,
+               N.PER_NO,
+               TO_CHAR(N.WRT_DATE, 'YYYYMMDD') AS WRT_DATE,
+               N.CRT_DTM,
+               N.CRT_CMENO,
+               N.LSCHG_DTM,
+               N.LS_CMENO
+          FROM TB_NOTICE N
+          LEFT JOIN TB_OFC_REG_MGT O ON O.OFC_CODE = N.OFC_CODE
+        <include refid="searchWhere"/>
+         ORDER BY N.NO DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <select id="countList" resultType="long">
+        SELECT COUNT(*)
+          FROM TB_NOTICE N
+        <include refid="searchWhere"/>
+    </select>
+
+    <select id="selectOne" resultType="kr.co.nh.atms.web.notice.dto.Notice">
+        SELECT N.NO,
+               N.OFC_CODE,
+               O.KANM,
+               N.SUBJECT,
+               N.TEXT,
+               N.VISIT,
+               N.NAME,
+               N.PER_NO,
+               TO_CHAR(N.WRT_DATE, 'YYYYMMDD') AS WRT_DATE,
+               N.CRT_DTM,
+               N.CRT_CMENO,
+               N.LSCHG_DTM,
+               N.LS_CMENO
+          FROM TB_NOTICE N
+          LEFT JOIN TB_OFC_REG_MGT O ON O.OFC_CODE = N.OFC_CODE
+         WHERE N.NO = #{no}
+    </select>
+
+    <!-- 채번(잠정 Q-02, 원본 선례 MAX+1) — 동시 등록이면 PK 충돌 → 서비스가 한 번 다시 시도 -->
+    <select id="selectNextNo" resultType="long">
+        SELECT NVL(MAX(NO), 0) + 1
+          FROM TB_NOTICE
+    </select>
+
+    <insert id="insert" parameterType="kr.co.nh.atms.web.notice.dto.Notice">
+        INSERT INTO TB_NOTICE
+               (NO, OFC_CODE, SUBJECT, TEXT, VISIT, NAME, PER_NO, WRT_DATE,
+                CRT_DTM, CRT_CMENO, LSCHG_DTM, LS_CMENO)
+        VALUES (#{no}, CAST(#{ofcCode} AS CHAR(6)), #{subject}, #{text}, 0, #{name}, #{perNo}, SYSDATE,
+                #{crtDtm}, #{crtCmeno}, #{lschgDtm}, #{lsCmeno})
+    </insert>
+
+    <!-- 작성자(NAME·PER_NO)·작성일·조회수는 바꾸지 않는다 -->
+    <update id="update" parameterType="kr.co.nh.atms.web.notice.dto.Notice">
+        UPDATE TB_NOTICE
+           SET SUBJECT   = #{subject},
+               TEXT      = #{text},
+               OFC_CODE  = CAST(#{ofcCode} AS CHAR(6)),
+               LSCHG_DTM = #{lschgDtm},
+               LS_CMENO  = #{lsCmeno}
+         WHERE NO = #{no}
+    </update>
+
+    <!-- 조회수는 "변경"이 아니므로 감사 컬럼(LSCHG_DTM·LS_CMENO)을 건드리지 않는다(파라미터도 Auditable 아님) -->
+    <update id="increaseVisit">
+        UPDATE TB_NOTICE
+           SET VISIT = NVL(VISIT, 0) + 1
+         WHERE NO = #{no}
+    </update>
+
+    <!-- 물리 삭제(정본에 사용여부 컬럼 없음, 설계 §8.2). 목록은 서비스가 1~100건·중복 제거로 정리 -->
+    <delete id="deleteByNos">
+        DELETE FROM TB_NOTICE
+         WHERE NO IN
+        <foreach collection="nos" item="n" open="(" separator="," close=")">
+            #{n}
+        </foreach>
+    </delete>
+</mapper>

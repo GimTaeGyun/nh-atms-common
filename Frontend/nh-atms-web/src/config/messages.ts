@@ -75,6 +75,8 @@ export const VMSG = {
   /* ── 형식 ── */
   /** 20자 이내로 입력하세요. */
   maxLength: (n: number) => `${n}자 이내로 입력하세요.`,
+  /** 200바이트 이내로 입력하세요. (한글은 2바이트) — 바이트 계산은 utils/rules byteLength(잠정 Q-07) */
+  maxBytes: (n: number) => `${n}바이트 이내로 입력하세요. (한글은 2바이트)`,
   /** 숫자 3자리로 입력하세요. */
   digits: (n: number) => `숫자 ${n}자리로 입력하세요.`,
   numeric: '숫자만 입력하세요.',
@@ -84,10 +86,6 @@ export const VMSG = {
   minInput: (min: number) => `${min} 이상으로 입력하세요.`,
   maxInput: (max: number) => `${max} 이하로 입력하세요.`,
   phone: '전화번호 형식이 아닙니다. (예: 02-1234-5678)',
-  passwordConfirm: '비밀번호를 한 번 더 입력하세요.',
-  passwordMismatch: '비밀번호가 일치하지 않습니다.',
-  passwordRule: '영문·숫자·특수문자를 모두 포함하세요.',
-  userIdChars: '영문·숫자·._- 만 입력하세요.',
   /** 영문 대문자/숫자/_ 2~20자로 입력하세요. */
   codeUpper: (min: number, max: number) => `영문 대문자/숫자/_ ${min}~${max}자로 입력하세요.`,
   /** 코드는 숫자 2자리로 입력하세요. */
@@ -102,6 +100,8 @@ export const VMSG = {
 
   /* ── 그 밖의 사전 검사 ── */
   noChanges: '변경된 내용이 없습니다.',
+  /** 이미 등록된 모델코드입니다. (01-01-A1) — 서버 MDL_002 와 같은 글(보내기 전에 표 안 중복을 막을 때) */
+  duplicateModel: (key: string) => `이미 등록된 모델코드입니다. (${key})`,
 } as const;
 
 /**
@@ -117,6 +117,8 @@ export const CMSG = {
   approveTarget: (target: string) => `${w(target, '을/를')} 승인하시겠습니까?`,
   /** 선택한 3건을 삭제하시겠습니까? · 선택한 3건의 C/S 이력을 삭제하시겠습니까? */
   deleteSelected: (n: number, what?: string, how = '삭제') => (what ? `선택한 ${n}건의 ${w(what, '을/를')} ${how}하시겠습니까?` : `선택한 ${n}건을 ${how}하시겠습니까?`),
+  /** 선택한 1건의 기기를 삭제(사용여부 N 처리)하시겠습니까? — 논리 삭제(USE_YN='N') 확인 */
+  softDelete: (n: number, what: string) => `선택한 ${n}건의 ${w(what, '을/를')} 삭제(사용여부 N 처리)하시겠습니까?`,
   /** 이 메뉴를 삭제(사용안함)하시겠습니까? */
   menuDisable: '이 메뉴를 삭제(사용안함)하시겠습니까?',
 } as const;

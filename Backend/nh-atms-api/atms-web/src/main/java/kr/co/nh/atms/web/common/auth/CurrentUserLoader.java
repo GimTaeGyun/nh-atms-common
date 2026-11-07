@@ -63,7 +63,7 @@ public class CurrentUserLoader {
     /**
      * TB_SCR_AUTH 행 중 하나를 채택한다.
      * <p>
-     * <b>잠정 (API 계약 §1)</b>: {@code APV_STS='Y'} 이고 {@code DUE_DATE} 가 비었거나 지금(14자리) 이후인 행 중
+     * <b>잠정 Q-11 (API 계약 §1)</b>: {@code APV_STS='Y'} 이고 {@code DUE_DATE} 가 비었거나 지금(14자리) 이후인 행 중
      * {@code AUTH} 오름차순 첫 행. 한 사람이 여러 부서·사무소 권한을 가질 때의 규칙은 현업 확인 전이다.
      */
     public static ScrAuthRow pickAuth(List<ScrAuthRow> rows, String now14) {
@@ -85,7 +85,7 @@ public class CurrentUserLoader {
     /**
      * 관리자 여부.
      * <p>
-     * <b>잠정 (설계 §5.5, 23 메모 §4.2)</b>: AS-IS 실데이터에서 {@code AUTH='A'} = Admin. 현업 확인 전이다.
+     * <b>잠정 Q-09 (설계 §5.5, 23 메모 §4.2)</b>: AS-IS 실데이터에서 {@code AUTH='A'} = Admin. 현업 확인 전이다.
      */
     public static String adminYnOf(String auth) {
         return auth != null && "A".equals(auth.trim()) ? "Y" : "N";

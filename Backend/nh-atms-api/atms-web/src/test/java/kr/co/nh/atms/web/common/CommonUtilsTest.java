@@ -1,5 +1,6 @@
 package kr.co.nh.atms.web.common;
 
+import kr.co.nh.atms.common.exception.BusinessException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,12 +11,19 @@ class CommonUtilsTest {
     @Test
     void officeCode() {
         assertThat(OfficeCode.norm(" 000080 ")).isEqualTo("000080");
+        assertThat(OfficeCode.norm("80")).isEqualTo("000080");
+        assertThat(OfficeCode.norm("1")).isEqualTo("000001");
         assertThat(OfficeCode.norm("")).isNull();
-        assertThat(OfficeCode.toDb("000080", false)).isEqualTo("000080");
-        assertThat(OfficeCode.toDb("000080", true)).isEqualTo("00080");
-        assertThat(OfficeCode.fromDb("00101")).isEqualTo("000101");
-        assertThat(OfficeCode.fromDb("000101 ")).isEqualTo("000101");
+        assertThat(OfficeCode.norm(null)).isNull();
+        assertThat(OfficeCode.require(" 101 ")).isEqualTo("000101");
+        assertThatThrownBy(() -> OfficeCode.require(" ")).isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("V001_20");
         assertThatThrownBy(() -> OfficeCode.require(" ")).hasMessageContaining("사무소코드");
+        assertThatThrownBy(() -> OfficeCode.norm("1234567")).isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("VAL_003");
+        assertThatThrownBy(() -> OfficeCode.norm("00008A")).isInstanceOf(BusinessException.class)
+                .hasMessageContaining("ofcCode");
+        assertThatThrownBy(() -> OfficeCode.require("0-80")).extracting("code").isEqualTo("VAL_003");
     }
 
     @Test

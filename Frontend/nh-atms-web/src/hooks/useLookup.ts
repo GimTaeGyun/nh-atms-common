@@ -30,6 +30,9 @@ export const useVendors = () => useQuery({ queryKey: lookupKeys.vendors, queryFn
 export const useModels = (p: { vendCode?: string; mcnType?: string }, all = false) =>
   useQuery({ queryKey: lookupKeys.models(p), queryFn: () => lookupApi.models(p), enabled: all || !!p.vendCode, staleTime: MID });
 
+/** 기종(SRC) 목록 — vendCode 를 주면 그 업체 것만, 없으면 전체 */
+export const useSrcs = (vendCode?: string) => useQuery({ queryKey: lookupKeys.srcs(vendCode), queryFn: () => lookupApi.srcs({ vendCode }), staleTime: LONG });
+
 /** 기기(기번) 목록 — 사무소 종속 */
 export const useMcns = (ofcCode?: string, opts: { vendCode?: string; q?: string } = {}) =>
   useQuery({ queryKey: lookupKeys.machines({ ofcCode, ...opts }), queryFn: () => lookupApi.machines({ ofcCode: ofcCode!, ...opts }), enabled: !!ofcCode, staleTime: MID });

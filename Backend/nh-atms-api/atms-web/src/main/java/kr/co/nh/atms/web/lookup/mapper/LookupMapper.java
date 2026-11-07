@@ -1,16 +1,17 @@
 package kr.co.nh.atms.web.lookup.mapper;
 
-import kr.co.nh.atms.web.lookup.dto.Code;
-import kr.co.nh.atms.web.lookup.dto.Corner;
-import kr.co.nh.atms.web.lookup.dto.DistinctValue;
-import kr.co.nh.atms.web.lookup.dto.Holiday;
-import kr.co.nh.atms.web.lookup.dto.Machine;
-import kr.co.nh.atms.web.lookup.dto.Model;
-import kr.co.nh.atms.web.lookup.dto.Office;
-import kr.co.nh.atms.web.lookup.dto.Person;
-import kr.co.nh.atms.web.lookup.dto.Sido;
-import kr.co.nh.atms.web.lookup.dto.Sigun;
-import kr.co.nh.atms.web.lookup.dto.Vendor;
+import kr.co.nh.atms.web.lookup.dto.LookupCode;
+import kr.co.nh.atms.web.lookup.dto.LookupCorner;
+import kr.co.nh.atms.web.lookup.dto.LookupDistinctValue;
+import kr.co.nh.atms.web.lookup.dto.LookupHoliday;
+import kr.co.nh.atms.web.lookup.dto.LookupMachine;
+import kr.co.nh.atms.web.lookup.dto.LookupModel;
+import kr.co.nh.atms.web.lookup.dto.LookupOffice;
+import kr.co.nh.atms.web.lookup.dto.LookupPerson;
+import kr.co.nh.atms.web.lookup.dto.LookupSido;
+import kr.co.nh.atms.web.lookup.dto.LookupSigun;
+import kr.co.nh.atms.web.lookup.dto.LookupSrc;
+import kr.co.nh.atms.web.lookup.dto.LookupVendor;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,45 +21,48 @@ import java.util.List;
 @Mapper
 public interface LookupMapper {
 
-    List<Office> selectOffices(@Param("q") String q);
+    List<LookupOffice> selectOffices(@Param("q") String q);
 
-    Office selectOffice(@Param("ofcCode") String ofcCode);
+    LookupOffice selectOffice(@Param("ofcCode") String ofcCode);
 
-    List<Person> selectPersons(@Param("ofcCode") String ofcCode, @Param("q") String q, @Param("today") String today);
+    List<LookupPerson> selectPersons(@Param("ofcCode") String ofcCode, @Param("q") String q, @Param("today") String today);
 
-    Person selectPerson(@Param("perNo") String perNo);
+    LookupPerson selectPerson(@Param("perNo") String perNo);
 
     /** 기기사: TB_CO_CODE 의 코드구분(설정 atms.lookup.vendor-code-type) */
-    List<Vendor> selectVendorsFromCode(@Param("codeType") String codeType);
+    List<LookupVendor> selectVendorsFromCode(@Param("codeType") String codeType);
 
     /** 기기사: TB_CO_MODEL·TB_MCN_INFO 의 VEND_CODE 값(이름 없음) */
-    List<Vendor> selectVendorsDistinct();
+    List<LookupVendor> selectVendorsDistinct();
 
-    List<Model> selectModels(@Param("vendCode") String vendCode, @Param("mcnType") String mcnType);
+    List<LookupModel> selectModels(@Param("vendCode") String vendCode, @Param("mcnType") String mcnType);
 
-    List<Machine> selectMachines(@Param("ofcCode") String ofcCode, @Param("vendCode") String vendCode, @Param("q") String q);
+    /** 기종: TB_NMS_SRC (업체코드로 좁히기 선택) */
+    List<LookupSrc> selectSrcs(@Param("vendCode") String vendCode);
 
-    List<Corner> selectCorners(@Param("ofcCode") String ofcCode);
+    List<LookupMachine> selectMachines(@Param("ofcCode") String ofcCode, @Param("vendCode") String vendCode, @Param("q") String q);
 
-    List<Code> selectCodes(@Param("codeType") String codeType);
+    List<LookupCorner> selectCorners(@Param("ofcCode") String ofcCode);
 
-    List<Sido> selectSido();
+    List<LookupCode> selectCodes(@Param("codeType") String codeType);
 
-    List<Sigun> selectSigun(@Param("sidoCode") String sidoCode);
+    List<LookupSido> selectSido();
 
-    List<Holiday> selectHolidays(@Param("from") String from, @Param("to") String to);
+    List<LookupSigun> selectSigun(@Param("sidoCode") String sidoCode);
+
+    List<LookupHoliday> selectHolidays(@Param("from") String from, @Param("to") String to);
 
     // ── 있는 값 목록(distinct) — 허용 목록 target 마다 하나씩(${} 금지). 연결은 LookupService.DISTINCT ──
 
-    List<DistinctValue> selectDistinctMcnKomType();
+    List<LookupDistinctValue> selectDistinctMcnKomType();
 
-    List<DistinctValue> selectDistinctMcnOpType();
+    List<LookupDistinctValue> selectDistinctMcnOpType();
 
-    List<DistinctValue> selectDistinctMcnInoutType();
+    List<LookupDistinctValue> selectDistinctMcnInoutType();
 
-    List<DistinctValue> selectDistinctMcnCnrPstSpec();
+    List<LookupDistinctValue> selectDistinctMcnCnrPstSpec();
 
-    List<DistinctValue> selectDistinctMcnVendCode();
+    List<LookupDistinctValue> selectDistinctMcnVendCode();
 
-    List<DistinctValue> selectDistinctModelMcnType();
+    List<LookupDistinctValue> selectDistinctModelMcnType();
 }

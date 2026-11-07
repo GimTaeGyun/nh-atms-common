@@ -98,7 +98,7 @@ describe('formItem / formGroup', () => {
         <ConfigProvider>
           <App>
             <Form form={form} component={false}>
-              {formItem('officeCd', <Picker />, [req('사무소')])}
+              {formItem('ofcCode', <Picker />, [req('사무소')])}
               <Button onClick={() => void form.validateFields().catch(() => undefined)}>저장</Button>
             </Form>
           </App>

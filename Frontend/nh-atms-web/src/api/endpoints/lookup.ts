@@ -1,5 +1,5 @@
 import { api } from '../http';
-import type { Code, Corner, DistinctTarget, DistinctValue, Holiday, Machine, Model, Office, Person, Sido, Sigun, Vendor } from '@/domain/lookup';
+import type { Code, Corner, DistinctTarget, DistinctValue, Holiday, Machine, Model, Office, Person, Sido, Sigun, Src, Vendor } from '@/domain/lookup';
 import { compactParams } from '@/utils/object';
 
 /**
@@ -19,6 +19,8 @@ export const lookupApi = {
   vendors: () => api.get<Vendor[]>('/lookup/vendors'),
   /** 모델 목록 */
   models: (p: { vendCode?: string; mcnType?: string } = {}) => api.get<Model[]>('/lookup/models', { params: compactParams(p) }),
+  /** 기종(SRC) 목록 (vendCode 로 좁히기 선택) */
+  srcs: (p: { vendCode?: string } = {}) => api.get<Src[]>('/lookup/srcs', { params: compactParams(p) }),
   /** 기기 목록 (ofcCode 필수 V001_20, q = 기번) */
   machines: (p: { ofcCode: string; vendCode?: string; q?: string }) => api.get<Machine[]>('/lookup/machines', { params: compactParams(p) }),
   /** 코너 목록 (ofcCode 필수) */
@@ -43,6 +45,7 @@ export const lookupKeys = {
   person: (perNo: string) => ['lookup', 'person', perNo] as const,
   vendors: ['lookup', 'vendors'] as const,
   models: (p: { vendCode?: string; mcnType?: string }) => ['lookup', 'models', p.vendCode ?? '', p.mcnType ?? ''] as const,
+  srcs: (vendCode?: string) => ['lookup', 'srcs', vendCode ?? ''] as const,
   machines: (p: { ofcCode?: string; vendCode?: string; q?: string }) => ['lookup', 'machines', p.ofcCode ?? '', p.vendCode ?? '', p.q ?? ''] as const,
   corners: (ofcCode?: string) => ['lookup', 'corners', ofcCode ?? ''] as const,
   codes: (codeType: string) => ['lookup', 'codes', codeType] as const,

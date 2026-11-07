@@ -9,28 +9,28 @@ const wrapper = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{children}</QueryClientProvider>
 );
 
-type P = PageParams & { officeCd: string };
+type P = PageParams & { ofcCode: string };
 
 describe('조회 전 새로고침', () => {
   it('usePagedSearch: 조회 전에는 refetch 가 API 를 부르지 않고, 조회 후에는 같은 조건으로 다시 부른다', async () => {
-    const fetch = vi.fn(async (p: P): Promise<PageResult<string>> => ({ content: [p.officeCd], totalCount: 1, page: p.page ?? 1, size: p.size ?? 20, totalPages: 1 }));
+    const fetch = vi.fn(async (p: P): Promise<PageResult<string>> => ({ content: [p.ofcCode], totalCount: 1, page: p.page ?? 1, size: p.size ?? 20, totalPages: 1 }));
     const { result } = renderHook(() => usePagedSearch<P, string>({ key: (p) => ['t', p], fetch }), { wrapper });
 
     await act(() => result.current.refetch());
     expect(fetch).not.toHaveBeenCalled();
 
-    act(() => result.current.search({ officeCd: '000080' }));
+    act(() => result.current.search({ ofcCode: '000080' }));
     await waitFor(() => expect(result.current.rows).toEqual(['000080']));
     expect(fetch).toHaveBeenCalledTimes(1);
 
     await act(() => result.current.refetch());
     expect(fetch).toHaveBeenCalledTimes(2);
-    expect(fetch.mock.calls[1][0]).toMatchObject({ officeCd: '000080', page: 1 });
+    expect(fetch.mock.calls[1][0]).toMatchObject({ ofcCode: '000080', page: 1 });
   });
 
   it('useSearch: 조회 전에는 refetch 가 API 를 부르지 않는다', async () => {
-    const fetch = vi.fn(async (p: { officeCd: string }) => p.officeCd);
-    const { result } = renderHook(() => useSearch<{ officeCd: string }, string>({ key: (p) => ['s', p], fetch }), { wrapper });
+    const fetch = vi.fn(async (p: { ofcCode: string }) => p.ofcCode);
+    const { result } = renderHook(() => useSearch<{ ofcCode: string }, string>({ key: (p) => ['s', p], fetch }), { wrapper });
 
     await act(() => result.current.refetch());
     expect(fetch).not.toHaveBeenCalled();

@@ -6,6 +6,17 @@
 const toBool = (v: string | undefined, def = false): boolean =>
   v === undefined || v === '' ? def : /^(1|true|yes|on)$/i.test(v);
 
+export type MenuSourceMode = 'auto' | 'api' | 'static';
+
+/**
+ * 메뉴 출처 결정 — 운영 빌드(MODE=production)는 **항상 api**(내장 시드 대체 없음, 권한은 서버 응답만).
+ * 개발·목 모드는 VITE_MENU_SOURCE(auto | api | static), 값이 없거나 모르면 auto.
+ */
+export const menuSourceOf = (mode: string, raw: string | undefined): MenuSourceMode => {
+  if (mode === 'production') return 'api';
+  return raw === 'api' || raw === 'static' ? raw : 'auto';
+};
+
 /** VITE_ENV_LABEL 이 없을 때(.env 파일 없는 AS-IS 프로젝트에 넣은 경우) 빌드 모드를 .env.* 와 같은 표기로 */
 const MODE_LABEL: Record<string, string> = { production: 'prod', development: 'local' };
 
@@ -20,10 +31,10 @@ export const env = {
   /** 라우터: browser(기본) | hash(`/#/home` — 웹서버에 SPA 새로고침 설정을 넣을 수 없을 때) */
   routerMode: (import.meta.env.VITE_ROUTER === 'hash' ? 'hash' : 'browser') as 'browser' | 'hash',
   /**
-   * 메뉴 출처: auto(기본 — /api/menu/my 응답에서 화면키를 하나도 못 찾으면 내장 메뉴 시드 사용)
-   * | api(응답 그대로) | static(내장 시드만, API 호출 안 함)
+   * 메뉴 출처: auto(개발 기본 — /api/menu/my 응답에서 화면키를 하나도 못 찾으면 내장 메뉴 시드(조회 권한만) 사용)
+   * | api(응답 그대로) | static(내장 시드만, API 호출 안 함). 운영 빌드는 VITE_MENU_SOURCE 와 상관없이 api.
    */
-  menuSource: (['api', 'static'].includes(import.meta.env.VITE_MENU_SOURCE ?? '') ? import.meta.env.VITE_MENU_SOURCE : 'auto') as 'auto' | 'api' | 'static',
+  menuSource: menuSourceOf(import.meta.env.MODE, import.meta.env.VITE_MENU_SOURCE),
 } as const;
 
 export type EnvLabel = 'local' | 'dev' | 'stg' | 'prod';

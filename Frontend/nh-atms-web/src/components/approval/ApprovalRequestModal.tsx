@@ -45,7 +45,7 @@ export const ApprovalRequestModal = ({ open, onCancel, onSubmit, title = '승인
   };
 
   return (
-    <Modal open={open} title={title} onCancel={cancel} onOk={() => form.submit()} okText={okText} cancelText="취소" confirmLoading={loading} destroyOnHidden maskClosable={false}>
+    <Modal open={open} title={title} onCancel={cancel} onOk={() => form.submit()} okText={okText} cancelText="취소" confirmLoading={loading} destroyOnHidden mask={{ closable: false }}>
       {target && <div className="panel" style={{ padding: 12, marginBottom: 12 }}>{target}</div>}
       <Form form={form} layout="vertical" onFinish={finish} preserve={false}>
         {approverOptions && (

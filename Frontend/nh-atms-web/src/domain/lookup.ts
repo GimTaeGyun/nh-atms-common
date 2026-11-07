@@ -35,6 +35,14 @@ export interface Model {
   modelNm: string | null;
 }
 
+/** 기종(SRC) — TB_NMS_SRC (PK SRC) */
+export interface Src {
+  src: string;
+  srcNm: string | null;
+  vendCode: string | null;
+  komType: string | null;
+}
+
 /** 기기 — TB_MCN_INFO ⟕ TB_SCRT_INST_PST ⟕ TB_NMS_SRC */
 export interface Machine {
   ofcCode: string;

@@ -7,7 +7,7 @@ import { toAppError } from '@/api/errors';
 import { STORAGE_PREFIX } from '@/config/constants';
 import { env } from '@/config/env';
 import { L1_BY_NAME } from '@/screens/l1';
-import { buildMenuSeed } from '@/screens/menuSeed';
+import { buildMenuSeed, type SeedPerms } from '@/screens/menuSeed';
 import { parseScreenPath } from '@/screens/registry';
 import type { ScreenKey } from '@/screens/screenIds';
 
@@ -53,9 +53,9 @@ export const useNavStore = create<NavState>()(
         set({ loading: true, error: null });
         try {
           const fromApi = env.menuSource === 'static' ? [] : await menuApi.my();
-          const { menus, source } = resolveMenus(fromApi, env.menuSource);
+          const { menus, source } = resolveMenus(fromApi, env.menuSource, env.useMock ? 'all' : 'qry');
           if (source === 'static' && env.menuSource === 'auto') {
-            console.info('[menu] /api/menu/my 응답에 화면(MENU_PATH → 화면키)이 없어 내장 메뉴 시드(src/screens/menuSeed.ts)를 사용합니다.');
+            console.info('[menu] /api/menu/my 응답에 화면(MENU_PATH → 화면키)이 없어 내장 메뉴 시드(src/screens/menuSeed.ts, 조회 권한만)를 사용합니다.');
           }
           set({ menus, menuSource: source, loaded: true, loading: false });
         } catch (e) {
@@ -116,13 +116,14 @@ export const toTree = (nodes: MenuNode[] | null | undefined, level = 1): MenuTre
 
 /**
  * 메뉴 트리 결정.
- *  - api: 응답 그대로(화면키를 못 찾은 화면은 사이드바에 안 나옴)
- *  - auto: 응답에서 화면키를 하나도 못 찾으면(메뉴 테이블 MENU_PATH 미입력 등) 내장 메뉴 시드로 대신한다
- *  - static: 내장 시드만(API 호출 안 함)
+ *  - api: 응답 그대로(화면키를 못 찾은 화면은 사이드바에 안 나옴). **운영 빌드는 항상 이것**(env.menuSource)
+ *  - auto(개발·목 모드만): 응답에서 화면키를 하나도 못 찾으면(메뉴 테이블 MENU_PATH 미입력 등) 내장 메뉴 시드로 대신한다
+ *  - static(개발·목 모드만): 내장 시드만(API 호출 안 함)
+ * 내장 시드의 권한(seedPerms): 목 모드면 'all'(5개 모두 Y), 그 밖은 'qry'(조회만 Y) — 서버 권한을 모르면서 쓰기 버튼을 열지 않는다.
  */
-export const resolveMenus = (fromApi: MenuNode[], mode: 'auto' | 'api' | 'static'): { menus: MenuTreeNode[]; source: MenuSource } => {
+export const resolveMenus = (fromApi: MenuNode[], mode: 'auto' | 'api' | 'static', seedPerms: SeedPerms = 'qry'): { menus: MenuTreeNode[]; source: MenuSource } => {
   const api = toTree(fromApi);
   if (mode === 'api') return { menus: api, source: 'api' };
   if (mode === 'auto' && flattenScreens(api).length > 0) return { menus: api, source: 'api' };
-  return { menus: toTree(buildMenuSeed()), source: 'static' };
+  return { menus: toTree(buildMenuSeed(seedPerms)), source: 'static' };
 };

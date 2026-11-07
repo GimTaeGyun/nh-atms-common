@@ -51,7 +51,8 @@ export const antdTheme: ThemeConfig = {
     Card: { headerBg: 'transparent', paddingLG: 16 },
     Modal: { titleFontSize: 15 },
     Form: { itemMarginBottom: 0, labelColor: colors.textPrimary },
-    Pagination: { itemActiveBg: colors.primary },
+    // 현재 페이지 번호: 남색 바탕에 흰 글자(itemActiveColor 를 안 주면 글자도 남색이라 번호가 안 보인다)
+    Pagination: { itemActiveBg: colors.primary, itemActiveColor: '#fff', itemActiveColorHover: '#fff' },
     Tag: { borderRadiusSM: 10 },
     Menu: { itemHeight: 34, subMenuItemBg: 'transparent' },
     Segmented: { itemSelectedBg: colors.primary, itemSelectedColor: '#fff' },

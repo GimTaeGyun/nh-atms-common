@@ -294,3 +294,8 @@ body {
 
 /* 휴일 표시(TB_NMS_HDAY) — 날짜 선택 달력 칸. hooks/useHolidays holidayCellRender 가 입힌다 */
 .holiday-cell .ant-picker-cell-inner { color: var(--danger); font-weight: 600; }
+
+/* 글자 수(바이트) 표시가 있는 TextArea — 숫자가 칸 아래에 붙으므로 자리를 비워 둔다(DetailGrid 칸 overflow 에 잘리지 않게) */
+.detail-grid .dg-v .ant-input-textarea-show-count { margin-bottom: 18px; }
+/* antd 6 Select 의 입력칸(AutoComplete 값·showSearch 검색어)이 브라우저 기본 글자 크기(13.3px)로 커지지 않게 — 다른 칸과 같은 크기 */
+.ant-select .ant-select-input { font-size: inherit; }

@@ -6,12 +6,18 @@
 import { meHandlers } from './me';
 import { menuHandlers } from './menu';
 import { lookupHandlers } from './lookup';
+import { noticeHandlers } from './notice';
+import { mcnInfoHandlers } from './mcnInfo';
+import { mcnModelHandlers } from './mcnModel';
 import { fallbackHandlers } from './fallback';
 
 export const handlers = [
   ...meHandlers,
   ...menuHandlers,
   ...lookupHandlers,
-  // 견본 화면 묶음(sample.notice·mcnInfo·mcnModel)은 각 화면 작업에서 여기에 한 줄씩 추가한다
+  // 견본 화면 묶음 — 배열은 각 파일(notice·mcnInfo·mcnModel.ts)에서 채운다. 이 파일은 리드만 고친다
+  ...noticeHandlers,
+  ...mcnInfoHandlers,
+  ...mcnModelHandlers,
   ...fallbackHandlers,
 ];

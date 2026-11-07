@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** `{asOf, page, summary}` 래퍼 (cash/verify) */
+/** `{asOf, page, summary}` 래퍼 — 기준시각 + 페이징 목록 + 합계·요약 */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

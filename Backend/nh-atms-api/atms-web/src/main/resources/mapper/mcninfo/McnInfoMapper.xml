@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+  기기정보 견본(sample.mcnInfo) — API 계약 §4, 설계 §8.3
+  - TB_MCN_INFO(OFC_CODE CHAR(6)·MCN_NO CHAR(3) PK, INST_PST_CODE CHAR(3), SRC VARCHAR2(2), KOM_TYPE VARCHAR2(5), VEND_CODE VARCHAR2(2),
+                OP_TYPE CHAR(1), INOUT_TYPE CHAR(1), USE_YN CHAR(1) NOT NULL, CNR_PST_SPEC_CODE CHAR(2), 감사 4컬럼)
+  - 키 비교: OFC_CODE = CAST(#{ofcCode} AS CHAR(6)), MCN_NO = CAST(#{mcnNo} AS CHAR(3)) — 값은 서비스가 정리(6자리·3자리)
+  - 조인(21지침 §5): 코너 TB_SCRT_INST_PST.INST_PST_CODE VARCHAR2(3) PK 쪽은 가공하지 않고 기기 쪽 CHAR(3) 을 RTRIM
+                    (공통 조회 LookupMapper.selectMachines 와 같은 규칙)
+  - 기기사명(잠정 Q6, LookupRules.vendorCodeType): 설정 코드구분이 있으면 TB_CO_CODE(CODE_TYPE·CODE VARCHAR2(10) PK) 의 CODE_NM, 없으면 NULL
+  - 감사 4컬럼은 AuditInterceptor 가 DTO 에 채운다 — 여기서는 #{crtDtm} 등을 바인딩만 한다
+  - ${} 금지
+-->
+<mapper namespace="kr.co.nh.atms.web.mcninfo.mapper.McnInfoMapper">
+
+    <sql id="selectColumns">
+        SELECT M.OFC_CODE,
+               O.KANM,
+               M.MCN_NO,
+               RTRIM(M.INST_PST_CODE) AS INST_PST_CODE,
+               P.INST_PST_NM,
+               M.SRC,
+               S.SRC_NM,
+               M.KOM_TYPE,
+               M.VEND_CODE,
+        <choose>
+            <when test="vendorCodeType != null">
+               C.CODE_NM AS VEND_NM,
+            </when>
+            <otherwise>
+               NULL AS VEND_NM,
+            </otherwise>
+        </choose>
+               RTRIM(M.OP_TYPE) AS OP_TYPE,
+               RTRIM(M.INOUT_TYPE) AS INOUT_TYPE,
+               M.USE_YN,
+               RTRIM(M.CNR_PST_SPEC_CODE) AS CNR_PST_SPEC_CODE,
+               M.CRT_DTM,
+               M.CRT_CMENO,
+               M.LSCHG_DTM,
+               M.LS_CMENO
+          FROM TB_MCN_INFO M
+          LEFT JOIN TB_OFC_REG_MGT O
+                 ON O.OFC_CODE = M.OFC_CODE
+          LEFT JOIN TB_SCRT_INST_PST P
+                 ON P.OFC_CODE = M.OFC_CODE
+                AND P.INST_PST_CODE = RTRIM(M.INST_PST_CODE)
+          LEFT JOIN TB_NMS_SRC S
+                 ON S.SRC = M.SRC
+        <if test="vendorCodeType != null">
+          LEFT JOIN TB_CO_CODE C
+                 ON C.CODE_TYPE = #{vendorCodeType}
+                AND C.CODE = M.VEND_CODE
+        </if>
+    </sql>
+
+    <!-- 목록 조건(selectList·countList 공용, 파라미터 이름 s) -->
+    <sql id="listWhere">
+         WHERE M.OFC_CODE = CAST(#{s.ofcCode} AS CHAR(6))
+        <if test="s.mcnNo != null">
+           AND M.MCN_NO = CAST(#{s.mcnNo} AS CHAR(3))
+        </if>
+        <if test="s.vendCode != null">
+           AND M.VEND_CODE = #{s.vendCode}
+        </if>
+        <if test="s.komType != null">
+           AND M.KOM_TYPE = #{s.komType}
+        </if>
+        <if test="s.opType != null">
+           AND M.OP_TYPE = CAST(#{s.opType} AS CHAR(1))
+        </if>
+        <if test="s.inoutType != null">
+           AND M.INOUT_TYPE = CAST(#{s.inoutType} AS CHAR(1))
+        </if>
+        <if test="s.useYn != null">
+           AND M.USE_YN = CAST(#{s.useYn} AS CHAR(1))
+        </if>
+    </sql>
+
+    <select id="selectList" resultType="kr.co.nh.atms.web.mcninfo.dto.McnInfo">
+        <include refid="selectColumns"/>
+        <include refid="listWhere"/>
+         ORDER BY M.OFC_CODE, M.MCN_NO
+        OFFSET #{s.offset} ROWS FETCH NEXT #{s.limit} ROWS ONLY
+    </select>
+
+    <select id="countList" resultType="long">
+        SELECT COUNT(*)
+          FROM TB_MCN_INFO M
+        <include refid="listWhere"/>
+    </select>
+
+    <select id="selectOne" resultType="kr.co.nh.atms.web.mcninfo.dto.McnInfo">
+        <include refid="selectColumns"/>
+         WHERE M.OFC_CODE = CAST(#{ofcCode} AS CHAR(6))
+           AND M.MCN_NO = CAST(#{mcnNo} AS CHAR(3))
+    </select>
+
+    <select id="countByKey" resultType="int">
+        SELECT COUNT(*)
+          FROM TB_MCN_INFO
+         WHERE OFC_CODE = CAST(#{ofcCode} AS CHAR(6))
+           AND MCN_NO = CAST(#{mcnNo} AS CHAR(3))
+    </select>
+
+    <insert id="insert" parameterType="kr.co.nh.atms.web.mcninfo.dto.McnInfoSave">
+        INSERT INTO TB_MCN_INFO (
+               OFC_CODE,
+               MCN_NO,
+               INST_PST_CODE,
+               SRC,
+               KOM_TYPE,
+               VEND_CODE,
+               OP_TYPE,
+               INOUT_TYPE,
+               USE_YN,
+               CNR_PST_SPEC_CODE,
+               CRT_DTM,
+               CRT_CMENO,
+               LSCHG_DTM,
+               LS_CMENO
+        ) VALUES (
+               #{ofcCode},
+               #{mcnNo},
+               #{instPstCode},
+               #{src},
+               #{komType},
+               #{vendCode},
+               #{opType},
+               #{inoutType},
+               #{useYn},
+               #{cnrPstSpecCode},
+               #{crtDtm},
+               #{crtCmeno},
+               #{lschgDtm},
+               #{lsCmeno}
+        )
+    </insert>
+
+    <update id="update" parameterType="kr.co.nh.atms.web.mcninfo.dto.McnInfoSave">
+        UPDATE TB_MCN_INFO
+           SET INST_PST_CODE     = #{instPstCode},
+               SRC               = #{src},
+               KOM_TYPE          = #{komType},
+               VEND_CODE         = #{vendCode},
+               OP_TYPE           = #{opType},
+               INOUT_TYPE        = #{inoutType},
+               USE_YN            = #{useYn},
+               CNR_PST_SPEC_CODE = #{cnrPstSpecCode},
+               LSCHG_DTM         = #{lschgDtm},
+               LS_CMENO          = #{lsCmeno}
+         WHERE OFC_CODE = CAST(#{ofcCode} AS CHAR(6))
+           AND MCN_NO = CAST(#{mcnNo} AS CHAR(3))
+    </update>
+
+    <!-- 논리 삭제(설계 Q11): 행은 남기고 USE_YN='N' -->
+    <update id="softDelete" parameterType="kr.co.nh.atms.web.mcninfo.dto.McnInfoKey">
+        UPDATE TB_MCN_INFO
+           SET USE_YN    = 'N',
+               LSCHG_DTM = #{lschgDtm},
+               LS_CMENO  = #{lsCmeno}
+         WHERE OFC_CODE = CAST(#{ofcCode} AS CHAR(6))
+           AND MCN_NO = CAST(#{mcnNo} AS CHAR(3))
+    </update>
+
+</mapper>

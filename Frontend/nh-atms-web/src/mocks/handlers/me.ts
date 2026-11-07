@@ -3,13 +3,17 @@ import type { Me } from '@/types/auth';
 import { MY_OFC_CODE, ME_PERSON } from '../data/lookup';
 import { LATENCY, fail, ok } from './_util';
 
-/** 목 고정 사용자 — 계약 §1 Me. 관리자 아님(권한은 메뉴 플래그로 본다) */
+/**
+ * 목 고정 사용자 — 계약 §1 Me. 관리자 아님(권한은 메뉴 플래그로 본다).
+ * 목 메뉴(`mocks/data/menu.ts`)는 시연을 위해 5개 플래그가 모두 Y 다 — DB 시드의 AUTH 'T'(삭제 N)와 일부러 다르다.
+ * 화면 버튼은 `auth` 값이 아니라 메뉴 플래그만 보므로, 권한별 모양은 공통 모듈 화면의 [권한 미리보기]로 확인한다.
+ */
 export const MOCK_ME: Me = {
   perNo: ME_PERSON.perNo,
   name: ME_PERSON.name,
   samuso: ME_PERSON.samuso,
   samusoName: ME_PERSON.samusoName,
-  deptCode: 'D0001',
+  deptCode: '000080',
   ofcCode: MY_OFC_CODE,
   kanm: '테크부문',
   auth: 'T',
