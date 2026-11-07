@@ -1,5 +1,5 @@
 import { Popover, Tooltip } from 'antd';
-import { DoubleRightOutlined, LogoutOutlined, SearchOutlined, SettingOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
+import { DoubleRightOutlined, SearchOutlined, SettingOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore, selectIsAdmin } from '@/stores/useAuthStore';
 import { useNavStore } from '@/stores/useNavStore';
@@ -9,7 +9,6 @@ import type { L1Slug } from '@/types/screen';
 import { MenuIcon } from './icons';
 import { GLOBAL_SEARCH_ID } from './GlobalSearch';
 import { FavoritesPopover } from './FavoritesPopover';
-import { useSignOut } from '@/hooks/useSignOut';
 
 interface Props {
   onOpenSettings: () => void;
@@ -24,8 +23,7 @@ interface Props {
 export const IconRail = ({ onOpenSettings }: Props) => {
   const navigate = useNavigate();
   const isAdmin = useAuthStore(selectIsAdmin);
-  const user = useAuthStore((s) => s.user);
-  const { signOut } = useSignOut();
+  const me = useAuthStore((s) => s.me);
   const activeL1 = useNavStore((s) => s.activeL1);
   const setActiveL1 = useNavStore((s) => s.setActiveL1);
   const panelCollapsed = useNavStore((s) => s.panelCollapsed);
@@ -83,25 +81,22 @@ export const IconRail = ({ onOpenSettings }: Props) => {
           content={
             <div style={{ width: 220 }}>
               <div style={{ padding: '4px 4px 8px', borderBottom: '1px solid var(--border-light)', marginBottom: 6 }}>
-                <div style={{ fontWeight: 700 }}>{user?.userName}</div>
+                <div style={{ fontWeight: 700 }}>{me?.name ?? '-'}</div>
                 <div className="muted" style={{ fontSize: 12 }}>
-                  {user?.deptName}
+                  개인번호 {me?.perNo ?? '-'}
                 </div>
                 <div className="muted" style={{ fontSize: 11 }}>
-                  사무소 [{user?.officeCd}] {user?.officeName} · {isAdmin ? '관리자' : '일반'}
+                  사무소 [{me?.ofcCode ?? '-'}] {me?.kanm ?? ''} · {isAdmin ? '관리자' : '일반'}
                 </div>
               </div>
               <button type="button" className="quick-link" onClick={onOpenSettings}>
                 <SettingOutlined /> 환경설정
               </button>
-              <button type="button" className="quick-link" onClick={() => void signOut()}>
-                <LogoutOutlined /> 로그아웃
-              </button>
             </div>
           }
         >
           <div className="rail-avatar" aria-label="사용자">
-            {user?.userName?.slice(0, 1) ?? 'U'}
+            {me?.name?.slice(0, 1) ?? 'U'}
           </div>
         </Popover>
       </div>

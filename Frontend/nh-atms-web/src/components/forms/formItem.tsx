@@ -33,7 +33,7 @@ export const triggerOf = (node: ReactNode): 'onBlur' | 'onChange' => (isValidEle
  * antd `noStyle` 은 빨간 테두리만 생기고 오류 글씨가 안 보이므로, 기본은 여백 0 + 오류 글씨 표시로 둔다.
  * 검사 시점: 글자 칸은 벗어날 때, 고르는 칸은 고르는 순간, 그리고 저장할 때 전체(triggerOf).
  *
- *   { label: '기번', required: true, value: formItem('termId', <Input />, RULES.termId) }
+ *   { label: '기번', required: true, value: formItem('mcnNo', <Input />, RULES.mcnNo) }
  */
 export const formItem = (name: NamePath, node: ReactNode, rules?: Rule[], opts: FormItemOpts = {}): ReactNode => (
   <Form.Item

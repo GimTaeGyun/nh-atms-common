@@ -55,16 +55,16 @@ export const fmtCount = (v?: Nullable<number>): string => (v === null || v === u
 export const fmtPercent = (v?: Nullable<number>, digits = 1): string =>
   v === null || v === undefined || !Number.isFinite(v) ? DASH : `${v.toFixed(digits)}%`;
 
-/** 사무소코드 + 기번 → '000080-001' */
-export const fmtTermId = (officeCd?: Nullable<string>, termId?: Nullable<string>): string => {
-  if (!officeCd && !termId) return DASH;
-  return `${officeCd ?? ''}-${termId ?? ''}`;
+/** 사무소코드 + 기번 → '000080-001' (이름은 원본 그대로 fmtTermId) */
+export const fmtTermId = (ofcCode?: Nullable<string>, mcnNo?: Nullable<string>): string => {
+  if (!ofcCode && !mcnNo) return DASH;
+  return `${ofcCode ?? ''}-${mcnNo ?? ''}`;
 };
 
-/** '[000080] 테크부문(테크솔루션부문)' 형태 사무소 라벨 */
-export const fmtOffice = (officeCd?: Nullable<string>, officeName?: Nullable<string>): string => {
-  if (!officeCd) return DASH;
-  return officeName ? `[${officeCd}] ${officeName}` : `[${officeCd}]`;
+/** '[000080] 테크부문' 형태 사무소 라벨 (사무소명 = TB_OFC_REG_MGT.KANM) */
+export const fmtOffice = (ofcCode?: Nullable<string>, kanm?: Nullable<string>): string => {
+  if (!ofcCode) return DASH;
+  return kanm ? `[${ofcCode}] ${kanm}` : `[${ofcCode}]`;
 };
 
 /** 전화번호 하이픈 */

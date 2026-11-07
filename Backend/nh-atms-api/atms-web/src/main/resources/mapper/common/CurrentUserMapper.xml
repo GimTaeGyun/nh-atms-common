@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 현재 사용자(고정 개인번호) — TB_INSA · TB_SCR_AUTH · TB_OFC_REG_MGT (설계 §5.3, API 계약 §1) -->
+<mapper namespace="kr.co.nh.atms.web.common.auth.CurrentUserMapper">
+
+    <!-- TB_INSA.PER_NO VARCHAR2(9) -->
+    <select id="selectInsa" resultType="kr.co.nh.atms.web.common.auth.InsaRow">
+        SELECT PER_NO,
+               NAME,
+               SAMUSO,
+               SAMUSO_NAME
+          FROM TB_INSA
+         WHERE PER_NO = #{perNo}
+    </select>
+
+    <!-- TB_SCR_AUTH: DEPT_CODE·OFC_CODE CHAR(6), APV_STS CHAR(2), DUE_DATE CHAR(14) → RTRIM. 채택 규칙은 CurrentUserLoader.pickAuth(잠정) -->
+    <select id="selectAuths" resultType="kr.co.nh.atms.web.common.auth.ScrAuthRow">
+        SELECT RTRIM(DEPT_CODE) AS DEPT_CODE,
+               RTRIM(OFC_CODE)  AS OFC_CODE,
+               AUTH,
+               RTRIM(APV_STS)   AS APV_STS,
+               RTRIM(DUE_DATE)  AS DUE_DATE
+          FROM TB_SCR_AUTH
+         WHERE PER_NO = #{perNo}
+    </select>
+
+    <!-- TB_OFC_REG_MGT.OFC_CODE CHAR(6) ← 바인드 값은 CAST (21지침 §5) -->
+    <select id="selectKanm" resultType="string">
+        SELECT KANM
+          FROM TB_OFC_REG_MGT
+         WHERE OFC_CODE = CAST(#{ofcCode} AS CHAR(6))
+    </select>
+
+</mapper>

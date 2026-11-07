@@ -9,8 +9,6 @@ export interface UserSettings {
   showTopNav: boolean;
   /** 그리드 기본 페이지 크기 */
   pageSize: number;
-  /** 신규 장애 알림 사운드 */
-  alarmSound: boolean;
   /** 열린 탭 복원 (브라우저 새로고침 시) */
   restoreTabs: boolean;
 }
@@ -20,7 +18,7 @@ interface SettingsState extends UserSettings {
   reset: () => void;
 }
 
-const DEFAULTS: UserSettings = { collapseOnNarrow: true, showTopNav: true, pageSize: 20, alarmSound: false, restoreTabs: true };
+const DEFAULTS: UserSettings = { collapseOnNarrow: true, showTopNav: true, pageSize: 20, restoreTabs: true };
 
 export const useSettingsStore = create<SettingsState>()(
   persist(

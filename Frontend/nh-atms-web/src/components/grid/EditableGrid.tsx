@@ -135,7 +135,7 @@ const itemProps = (ed: EditableConfig) => {
 };
 
 /**
- * 인라인 편집 그리드 (AS-IS 3000~3006, 7201/7203/7205, 6208 등).
+ * 인라인 편집 그리드 (견본: 기기모델코드 일괄 저장).
  *  - 그리드당 Form 1개, 셀마다 Form.Item(name=[행키, 필드])
  *  - 변경 셀 'cell-dirty', 추가 행 'row-added', 삭제 행 'row-deleted'(취소선)
  *  - ref 로 getChanges/validate/reset 제공, [행추가/행삭제/저장/취소] 툴바 내장

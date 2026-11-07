@@ -106,7 +106,7 @@ export const VMSG = {
 
 /**
  * 확인창 문구(Popconfirm·modal.confirm·ActionBar confirm). 말투는 "~하시겠습니까?" 하나로.
- * 사용: `<Popconfirm title={CMSG.deleteTarget(`코너 [${c.cornerCd}] ${c.cornerName}`)} …>`
+ * 사용: `<Popconfirm title={CMSG.deleteTarget(`코너 [${c.instPstCode}] ${c.instPstNm}`)} …>`
  */
 export const CMSG = {
   /** 삭제하시겠습니까? (ActionBar 삭제 버튼 기본) */

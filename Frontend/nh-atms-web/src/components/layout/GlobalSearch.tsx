@@ -8,7 +8,7 @@ import { L1_BY_NAME } from '@/screens/l1';
 import { STORAGE_PREFIX } from '@/config/constants';
 import { MenuIcon } from './icons';
 
-type Scope = 'ALL' | 'NAME' | 'ID';
+type Scope = 'ALL' | 'NAME' | 'PATH';
 
 export const GLOBAL_SEARCH_ID = 'global-screen-search';
 const RECENT_KEY = `${STORAGE_PREFIX}:search-recent`;
@@ -52,7 +52,7 @@ const Highlight = ({ text, q }: { text: string; q: string }) => {
 
 /**
  * 헤더 화면 검색(시안 2026-10-21 p.11): "전체 ▾ | 검색어를 입력하세요" → 드롭다운에 최근 검색어 칩 + "검색 결과 (N)" +
- * 행마다 대분류 아이콘·화면명(검색어 강조)·경로. 화면번호로도 찾는다. Ctrl+K 로 포커스.
+ * 행마다 대분류 아이콘·화면명(검색어 강조)·경로. 화면명 또는 경로(화면키)로 찾는다(번호 없음, 설계 Q9). Ctrl+K 로 포커스.
  */
 export const GlobalSearch = () => {
   const menus = useNavStore((s) => s.menus);
@@ -69,7 +69,11 @@ export const GlobalSearch = () => {
     const ql = q.toLowerCase();
     if (!ql) return [];
     return screens
-      .filter((s) => (scope === 'ID' ? s.screenId?.startsWith(ql) : scope === 'NAME' ? s.menuName.toLowerCase().includes(ql) : s.screenId?.startsWith(ql) || s.menuName.toLowerCase().includes(ql)))
+      .filter((s) => {
+        const byName = s.menuNm.toLowerCase().includes(ql);
+        const byPath = (s.menuPath ?? '').toLowerCase().includes(ql) || (s.screenKey ?? '').toLowerCase().includes(ql);
+        return scope === 'NAME' ? byName : scope === 'PATH' ? byPath : byName || byPath;
+      })
       .slice(0, 12);
   }, [q, scope, screens]);
   const options = useMemo(
@@ -82,8 +86,8 @@ export const GlobalSearch = () => {
             <div className="gs-item">
               <span className="gs-icon"><MenuIcon name={l1?.icon} /></span>
               <span className="gs-main">
-                <span className="gs-name"><Highlight text={s.menuName} q={q} /><small>{s.screenId}</small></span>
-                <span className="gs-path">{l1?.label ?? s.l1} › {s.folder} › {s.menuName}</span>
+                <span className="gs-name"><Highlight text={s.menuNm} q={q} /></span>
+                <span className="gs-path">{[l1?.label ?? s.l1, s.folder, s.menuNm].filter(Boolean).join(' › ')}</span>
               </span>
             </div>
           ),
@@ -121,7 +125,7 @@ export const GlobalSearch = () => {
 
   return (
     <div className="global-search" style={{ display: 'flex', gap: 6 }}>
-      <Select<Scope> className="search-scope" value={scope} onChange={setScope} size="middle" style={{ width: 86 }} options={[{ value: 'ALL', label: '전체' }, { value: 'NAME', label: '화면명' }, { value: 'ID', label: '화면번호' }]} />
+      <Select<Scope> className="search-scope" value={scope} onChange={setScope} size="middle" style={{ width: 86 }} options={[{ value: 'ALL', label: '전체' }, { value: 'NAME', label: '화면명' }, { value: 'PATH', label: '경로' }]} />
       <AutoComplete
         value={kw}
         options={options}

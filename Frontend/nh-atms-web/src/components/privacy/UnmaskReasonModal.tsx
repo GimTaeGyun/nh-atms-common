@@ -29,7 +29,7 @@ const compose = (v: Values): string => {
   return detail ? `${v.reasonType}: ${detail}` : String(v.reasonType);
 };
 
-/** 개인정보 원문 열람 사유 입력 모달 (9400 열람사유 흐름 일반화) */
+/** 개인정보 원문 열람 사유 입력 모달 (열람사유 흐름 일반화) */
 export const UnmaskReasonModal = ({ open, onCancel, onSubmit, title = '개인정보 열람 사유', description }: Props) => {
   const [form] = Form.useForm<Values>();
   const reasonType = Form.useWatch('reasonType', form);

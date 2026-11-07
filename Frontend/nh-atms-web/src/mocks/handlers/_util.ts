@@ -20,9 +20,9 @@ export const paginate = <T,>(rows: T[], sp: URLSearchParams): PageResult<T> => {
 export const LATENCY = () => delay(Math.round(120 + Math.random() * 280));
 export { delay };
 
-/** 기본 사무소(로그인 사용자 소속) */
+/** 기본 사무소(목 고정 사용자 소속, data/lookup.ts MY_OFC_CODE 와 같음) */
 export const DEFAULT_OFFICE = '000080';
-export const spOffice = (sp: URLSearchParams, key = 'officeCd'): string => sp.get(key) ?? DEFAULT_OFFICE;
+export const spOffice = (sp: URLSearchParams, key = 'ofcCode'): string => sp.get(key) ?? DEFAULT_OFFICE;
 /** YYYYMMDD 파라미터, 없으면 오늘 */
 export const spDate = (sp: URLSearchParams, key = 'date'): string => sp.get(key) ?? dayjs().format('YYYYMMDD');
 /** 빈 문자열/없음 → undefined */

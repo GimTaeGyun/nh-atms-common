@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import './page.css';
 
 interface Props {
-  /** 영문 화면키. 제목 옆 번호는 screenIds 매핑에서 표시 */
+  /** 영문 화면키. 화면번호는 쓰지 않는다(설계 Q9) — 매핑이 빈 값이면 번호 자리를 그리지 않는다 */
   screenKey: ScreenKey;
   title?: string;
   /** 제목 우측 보조 설명 */
@@ -44,7 +44,7 @@ export const PageFrame = ({ screenKey, title, subtitle, lastUpdated, onRefresh, 
 
   const l1 = def ? l1Label(def.slug) : menu?.l1 ? L1_BY_NAME[menu.l1]?.label ?? menu.l1 : undefined;
   const group = def?.group ?? menu?.folder;
-  const name = title ?? def?.title ?? menu?.menuName ?? screenId;
+  const name = title ?? def?.title ?? menu?.menuNm ?? screenKey;
   const isHome = screenKey === HOME_SCREEN_KEY;
 
   return (
@@ -56,7 +56,7 @@ export const PageFrame = ({ screenKey, title, subtitle, lastUpdated, onRefresh, 
         <div className="page-title">
           <span className="bar" />
           <h1>{name}</h1>
-          {!isHome && <span className="sid">{screenId}</span>}
+          {!isHome && screenId && <span className="sid">{screenId}</span>}
           {!isHome && (
             <Tooltip title={isFav ? '즐겨찾기 해제' : '즐겨찾기 추가'}>
               <button type="button" className={`fav-btn${isFav ? ' on' : ''}`} onClick={() => toggleFav(screenKey)} aria-label="즐겨찾기">

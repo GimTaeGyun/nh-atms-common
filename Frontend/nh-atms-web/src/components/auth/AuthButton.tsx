@@ -6,7 +6,7 @@ import { DENIED_TEXT, useAllowed, type PermNeed } from './useAllowed';
 export interface AuthButtonProps extends ButtonProps {
   /** 화면 ID (생략 시 ScreenIdProvider 값) */
   screenKey?: ScreenKey;
-  /** 요구 권한 (기본 write) */
+  /** 요구 권한 qry|reg|upd|del|exe|admin (기본 upd) */
   need?: PermNeed;
   /** 권한 없을 때: hide 숨김 / disable 비활성+툴팁 (기본) */
   mode?: 'hide' | 'disable';
@@ -17,7 +17,7 @@ export interface AuthButtonProps extends ButtonProps {
 }
 
 /** 권한 버튼: 권한이 없으면 숨기거나 비활성(툴팁 '권한이 없습니다.') */
-export const AuthButton = ({ screenKey, need = 'write', mode = 'disable', deniedText = DENIED_TEXT, ref, ...rest }: AuthButtonProps) => {
+export const AuthButton = ({ screenKey, need = 'upd', mode = 'disable', deniedText = DENIED_TEXT, ref, ...rest }: AuthButtonProps) => {
   const allowed = useAllowed(need, screenKey);
   if (allowed) return <Button ref={ref} {...rest} />;
   if (mode === 'hide') return null;
@@ -41,7 +41,7 @@ interface AuthGuardProps {
 }
 
 /** 권한이 있을 때만 children 렌더 */
-export const AuthGuard = ({ screenKey, need = 'write', fallback = null, children }: AuthGuardProps) => {
+export const AuthGuard = ({ screenKey, need = 'upd', fallback = null, children }: AuthGuardProps) => {
   const allowed = useAllowed(need, screenKey);
   return <>{allowed ? children : fallback}</>;
 };

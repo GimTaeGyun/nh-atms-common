@@ -7,8 +7,8 @@ import { MAX_OPEN_TABS } from '@/config/constants';
 import { notifyError } from '@/hooks/useAppMessage';
 import { getScreen, screenPath } from './registry';
 import type { L1Slug } from '@/types/screen';
-import { L1_BY_NAME, navSlugOf } from './l1';
-import { HOME_SCREEN_KEY, screenIdOf, type ScreenKey } from './screenIds';
+import { L1_BY_NAME, isL1Slug, navSlugOf } from './l1';
+import { HOME_SCREEN_KEY, type ScreenKey } from './screenIds';
 
 /** 화면키로 탭 열기 + 라우팅 (메뉴/즐겨찾기/검색/화면 내 링크 공통 진입점) */
 export const useOpenScreen = () => {
@@ -22,8 +22,9 @@ export const useOpenScreen = () => {
     (screenKey: ScreenKey) => {
       const def = getScreen(screenKey);
       const menu = findMenuByScreen(menus, screenKey);
-      const slug: L1Slug = def?.slug ?? (menu?.l1 ? L1_BY_NAME[menu.l1]?.slug : undefined) ?? 'mgmt';
-      const title = def?.title ?? menu?.menuName ?? screenIdOf(screenKey);
+      const keySlug = screenKey.split('.')[0] ?? '';
+      const slug: L1Slug = def?.slug ?? (menu?.l1 ? L1_BY_NAME[menu.l1]?.slug : undefined) ?? (isL1Slug(keySlug) ? keySlug : 'home');
+      const title = def?.title ?? menu?.menuNm ?? screenKey;
       const path = screenPath(screenKey, slug);
       const ok = open({ screenKey, title, path, closable: screenKey !== HOME_SCREEN_KEY });
       if (!ok) {

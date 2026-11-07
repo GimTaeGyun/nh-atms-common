@@ -10,20 +10,15 @@ export interface L1DefEx extends L1Def {
 }
 
 /**
- * 대분류(1뎁스) 정의 — AS-IS 서브탭 8 + 홈. 상단 메뉴(시안 B)와 아이콘 줄(시안 A)이 공유.
- * 게시판은 시안 B 처럼 상단 메뉴에 칸을 두지 않는다(결정 2026-10-18). 공지사항·업무연락은
- * 대시보드 게시판 카드와 대시보드 사이드바의 '게시판' 묶음으로 들어가고, 열면 '대시보드' 소속으로 보인다.
+ * 대분류(1뎁스) 정의 — 상단 메뉴와 아이콘 줄이 공유한다.
+ * `name` 은 메뉴 테이블(TB_SCR_MENU) 최상위 그룹의 MENU_NM 과 같아야 사이드바가 그 그룹을 찾는다.
+ * 이 저장소는 업무 대분류 없이 홈 + 견본 1개(설계 §6.6). 팝업(popup)은 메뉴에 칸이 없다.
+ * 새 업무 대분류를 추가하면: 여기 한 줄 + types/screen.ts L1Slug + 메뉴 테이블 그룹.
  */
 export const L1_DEFS: L1DefEx[] = [
-  { slug: 'home', name: '홈', label: '대시보드', railLabel: '대시보드', icon: 'DashboardOutlined' },
-  { slug: 'tx', name: '거래내역', label: '거래 내역', railLabel: '거래', icon: 'SwapOutlined' },
-  { slug: 'closing', name: '마감처리', label: '마감 처리', railLabel: '마감처리', icon: 'FileDoneOutlined' },
-  { slug: 'mgmt', name: '종합관리', label: '종합 관리', railLabel: '종합관리', icon: 'AppstoreOutlined' },
-  { slug: 'journal', name: '저널관리', label: '저널 관리', railLabel: '저널관리', icon: 'FileTextOutlined' },
-  { slug: 'stat', name: '통계', label: '통계', railLabel: '통계', icon: 'BarChartOutlined' },
-  { slug: 'outsrc', name: '일괄용역', label: '일괄 용역', railLabel: '일괄용역', icon: 'ToolOutlined' },
-  { slug: 'board', name: '게시판', label: '게시판', railLabel: '게시판', icon: 'NotificationOutlined', hidden: true, navAs: 'home' },
-  { slug: 'system', name: '관리자기능(A)', label: '관리자기능', railLabel: '관리자', icon: 'SettingOutlined', adminOnly: true },
+  { slug: 'home', name: '홈', label: '홈', railLabel: '홈', icon: 'HomeOutlined' },
+  { slug: 'sample', name: '견본', label: '견본', railLabel: '견본', icon: 'AppstoreOutlined' },
+  { slug: 'popup', name: '팝업', label: '팝업', railLabel: '팝업', icon: 'AppstoreOutlined', hidden: true, navAs: 'home' },
 ];
 
 export const L1_BY_SLUG: Record<L1Slug, L1DefEx> = Object.fromEntries(L1_DEFS.map((d) => [d.slug, d])) as Record<L1Slug, L1DefEx>;

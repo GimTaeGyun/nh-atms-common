@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.nh.atms.web.actionlog.mapper.UserActionLogMapper">
+
+    <!-- 사용자 행위 이력: T_USER_ACTION_LOG (nh-atms V1.6.16, TO-BE 대응 없음 H-074 → T_ 유지). USER_ID = 개인번호 -->
+    <insert id="insert">
+        INSERT INTO T_USER_ACTION_LOG (
+            LOG_SEQ, ACTION_DT, ACTION_TM, USER_ID, LOGIN_IP, SCREEN_KEY, SCREEN_NAME, ACTION,
+            REQ_METHOD, REQ_URI, HANDLER, ACTION_PARAM, REASON, RESULT_YN, RESULT_MSG, ELAPSED_MS
+        ) VALUES (
+            SEQ_T_USER_ACTION_LOG.NEXTVAL, #{actionDate}, #{actionTime}, #{userId}, #{loginIp,jdbcType=VARCHAR},
+            #{screenKey,jdbcType=VARCHAR}, #{screenName,jdbcType=VARCHAR}, #{action},
+            #{reqMethod}, #{reqUri}, #{handler,jdbcType=VARCHAR}, SUBSTRB(#{actionParam,jdbcType=VARCHAR}, 1, 4000),
+            SUBSTRB(#{reason,jdbcType=VARCHAR}, 1, 500), #{resultYn}, SUBSTRB(#{resultMsg,jdbcType=VARCHAR}, 1, 500), #{elapsedMs,jdbcType=NUMERIC}
+        )
+    </insert>
+
+</mapper>

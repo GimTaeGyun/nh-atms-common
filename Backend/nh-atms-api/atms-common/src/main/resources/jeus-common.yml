@@ -1,0 +1,37 @@
+# =====================================================================
+# JEUS(은행 개발서버) 공통 설정 — 배포킷(nh-atms-server) NH-ATMS atms-common/jeus-common.yml 에서 복사·축소
+#  - atms-web 의 application-jeus.yml 이 spring.config.import 로 읽는다 (atms-common jar 안에 포함)
+#  - 활성화: WAR 의 WEB-INF/web.xml 이 spring.profiles.active=jeus 지정 (빌드: ./gradlew bootWar -Pjeus)
+#  - JVM 옵션(-Djeus.host=... 등)이나 OS 환경변수로 지정하면 이 파일 값보다 우선한다
+#  - 이 저장소는 모듈이 atms-web 하나라서 다른 모듈 주소(jeus.url.*)·에이전트 입구·JWT 는 뺐다(로그인 없음 — 고정 사용자)
+#
+#  ※ CHANGE_ME 항목은 "내부망 소스(Gitea)" 에서만 실제 값으로 바꾼다. DB 는 JNDI 라 이 파일에 비밀번호가 없다.
+# =====================================================================
+
+jeus:
+  # 리스너 IP (2026-10-27 결정: 16.88.122.113 에서 LISTEN)
+  host: 16.88.122.113
+  # 앱 로그 폴더 (JEUS 실행 계정 jeusatms 가 쓰기 가능해야 함)
+  log-dir: /WASlogs/jeusATMSlogs/nbatmsltws01/app
+  # 업로드·다운로드 저장소 (jeusatms 쓰기 가능)
+  data-dir: /home/atmswas/data
+
+spring:
+  datasource:
+    # JEUS 데이터소스(JNDI) 사용 — DB 주소·계정·비밀번호는 JEUS(WAS 담당)에만 있고 WAR 에는 없다
+    #   jndi-name 이 있으면 Spring Boot 는 자체 커넥션 풀(Hikari)을 만들지 않고 JEUS 풀을 찾아 쓴다
+    #   찾는 순서: java:comp/env/dsATMS01 → dsATMS01
+    jndi-name: dsATMS01
+
+# 화면은 WebtoB 를 통해 같은 주소로 들어오므로 보통 불필요. 직접 접근 시를 위해 WebtoB 주소 지정
+cors:
+  allowed-origins: "http://CHANGE_ME_WEBTOB_HOST:9000"
+
+logging:
+  level:
+    kr.co.nh.atms: INFO
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
+      total-size-cap: 3GB

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 내 메뉴 — TB_SCR_MENU ⟕ TB_SCR_AUTH_MENU (설계 §5.4·§5.5). 트리 구성·가지치기는 MenuService.buildTree -->
+<mapper namespace="kr.co.nh.atms.web.menu.mapper.MenuMapper">
+
+    <select id="selectMenusWithAuth" resultType="kr.co.nh.atms.web.menu.dto.MenuNode">
+        SELECT M.MENU_ID,
+               M.PARENT_MENU_ID,
+               M.MENU_NM,
+               M.MENU_TYPE,
+               M.MENU_PATH,
+               M.SORT_NO,
+               M.USE_YN,
+               NVL(AM.QRY_ROL_YN, 'N') AS QRY_ROL_YN,
+               NVL(AM.REG_ROL_YN, 'N') AS REG_ROL_YN,
+               NVL(AM.UPD_ROL_YN, 'N') AS UPD_ROL_YN,
+               NVL(AM.DEL_ROL_YN, 'N') AS DEL_ROL_YN,
+               NVL(AM.EXE_ROL_YN, 'N') AS EXE_ROL_YN
+          FROM TB_SCR_MENU M
+          LEFT JOIN TB_SCR_AUTH_MENU AM
+                 ON AM.MENU_ID = M.MENU_ID
+                AND AM.AUTH = #{auth}
+                AND AM.USE_YN = 'Y'
+         WHERE M.USE_YN = 'Y'
+         ORDER BY M.SORT_NO, M.MENU_ID
+    </select>
+
+</mapper>

@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent } from 'react';
 
 /**
- * 주기 자동 새로고침 (3100 장애현황·5130 전국운영현황·홈).
+ * 주기 자동 새로고침 (현황 화면·홈).
  * 탭이 백그라운드(document.hidden)이거나 비활성 탭이면 쉬고, 다시 보이면 즉시 1회 실행.
  */
 export const useAutoRefresh = (enabled: boolean, intervalMs: number | null, callback: () => void, active = true): void => {

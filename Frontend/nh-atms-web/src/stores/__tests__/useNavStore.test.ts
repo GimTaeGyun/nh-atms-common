@@ -1,50 +1,62 @@
 import { describe, expect, it } from 'vitest';
-import type { MenuTreeNode } from '@/types/menu';
-import { flattenScreens, resolveMenus } from '../useNavStore';
+import type { MenuNode } from '@/types/menu';
+import { findMenuByScreen, flattenScreens, resolveMenus, topNodes, toTree } from '../useNavStore';
 
-/** 현 백엔드 MenuTreeNode 모양 — screenId·adminYn 없음 */
-const legacyTree: MenuTreeNode[] = [
-  { menuNo: 10, menuName: '종합관리', menuLevel: 1, menuType: 'D', children: [
-    { menuNo: 11, parentNo: 10, menuName: '영업점 등록사항', menuLevel: 2, menuType: 'D', children: [
-      { menuNo: 12, parentNo: 11, menuName: '자동화기기 설치코너 관리', menuUrl: '/corner', menuLevel: 3, menuType: 'M' },
-    ] },
-  ] },
+const node = (p: Partial<MenuNode> & Pick<MenuNode, 'menuId' | 'menuNm'>): MenuNode => ({
+  parentMenuId: 'ROOT',
+  menuType: 'M',
+  menuPath: null,
+  sortNo: 1,
+  useYn: 'Y',
+  qryRolYn: 'Y',
+  regRolYn: 'N',
+  updRolYn: 'N',
+  delRolYn: 'N',
+  exeRolYn: 'N',
+  children: [],
+  ...p,
+});
+
+/** 계약 MenuNode 모양 — MENU_PATH 로 화면을 잇는다 */
+const apiTree: MenuNode[] = [
+  node({ menuId: 'S', menuNm: '견본', menuType: 'G', children: [
+    node({ menuId: 'S2', parentMenuId: 'S', menuNm: '공지사항', menuPath: '/sample/notice', sortNo: 2, regRolYn: 'Y' }),
+    node({ menuId: 'S1', parentMenuId: 'S', menuNm: '기기정보', menuPath: '/sample/mcn-info', sortNo: 1 }),
+    node({ menuId: 'S3', parentMenuId: 'S', menuNm: '사용안함', menuPath: '/sample/mcn-model', sortNo: 3, useYn: 'N' }),
+    node({ menuId: 'S4', parentMenuId: 'S', menuNm: '모르는 경로', menuPath: '/zzz/unknown', sortNo: 4 }),
+  ] }),
 ];
 
-const apiTree: MenuTreeNode[] = [
-  { menuNo: 1, menuName: '종합관리', menuLevel: 1, menuType: 'D', children: [
-    { menuNo: 2, parentNo: 1, menuName: '영업점 등록사항', menuLevel: 2, menuType: 'D', children: [
-      { menuNo: 3, parentNo: 2, menuName: '자동화기기 설치코너 관리', screenId: '3000', menuLevel: 3, menuType: 'M' },
-    ] },
-  ] },
-];
+/** 화면 경로가 하나도 없는 응답(메뉴 테이블에 MENU_PATH 미입력) */
+const noPathTree: MenuNode[] = [node({ menuId: 'X', menuNm: '견본', menuType: 'G', children: [node({ menuId: 'X1', parentMenuId: 'X', menuNm: '무엇', menuPath: null })] })];
 
-const ids = (menus: MenuTreeNode[]) => flattenScreens(menus).map((n) => n.screenKey);
+const keys = (menus: ReturnType<typeof toTree>) => flattenScreens(menus).map((n) => n.screenKey);
 
-describe('resolveMenus', () => {
-  it('auto: 응답에 screenId 가 있으면 응답을 그대로 쓴다', () => {
-    const r = resolveMenus(apiTree, 'auto', false);
-    expect(r.source).toBe('api');
-    expect(ids(r.menus)).toEqual(['mgmt.cornerMgmt']); // 번호만 온 리프는 매핑으로 키를 채운다
+describe('toTree / resolveMenus', () => {
+  it('menuPath → 화면키, sortNo 순, useYn=N 제외, 모르는 경로는 화면키 없음', () => {
+    const t = toTree(apiTree);
+    expect(t[0].level).toBe(1);
+    expect(t[0].children.map((c) => c.menuNm)).toEqual(['기기정보', '공지사항', '모르는 경로']);
+    expect(keys(t)).toEqual(['sample.mcnInfo', 'sample.notice']);
+    expect(topNodes(t).map((x) => x.slug)).toEqual(['sample']);
+    expect(findMenuByScreen(t, 'sample.notice')?.regRolYn).toBe('Y');
   });
 
-  it('auto: screenId 가 하나도 없으면(현 백엔드) 내장 시드로 대신한다', () => {
-    const r = resolveMenus(legacyTree, 'auto', true);
+  it('auto: 응답에 화면이 있으면 응답을 쓴다', () => {
+    const r = resolveMenus(apiTree, 'auto');
+    expect(r.source).toBe('api');
+    expect(keys(r.menus)).toEqual(['sample.mcnInfo', 'sample.notice']);
+  });
+
+  it('auto: 화면이 하나도 없으면 내장 시드(견본 4화면)로 대신한다', () => {
+    const r = resolveMenus(noPathTree, 'auto');
     expect(r.source).toBe('static');
-    expect(ids(r.menus)).toEqual(expect.arrayContaining(['home', 'tx.specificTx', 'mgmt.cornerMgmt', 'system.authGrant']));
+    expect(keys(r.menus)).toEqual(['sample.commonModules', 'sample.notice', 'sample.mcnInfo', 'sample.mcnModel']);
   });
 
-  it('시드 대체 시 관리자가 아니면 관리자 전용 노드를 뺀다', () => {
-    const r = resolveMenus([], 'static', false);
-    const all = ids(r.menus);
-    expect(all).toContain('mgmt.cornerMgmt');
-    expect(all).not.toContain('system.authGrant');
-    expect(r.menus.some((n) => n.menuName === '관리자기능(A)')).toBe(false);
-  });
-
-  it('api: screenId 가 없어도 응답을 그대로 쓴다', () => {
-    const r = resolveMenus(legacyTree, 'api', true);
-    expect(r.source).toBe('api');
-    expect(r.menus).toEqual(legacyTree); // 키 보강(withScreenKeys)으로 복사본이 되지만 내용은 그대로
+  it('api: 화면이 없어도 응답 그대로, static: 시드만', () => {
+    expect(resolveMenus(noPathTree, 'api')).toMatchObject({ source: 'api' });
+    expect(keys(resolveMenus(noPathTree, 'api').menus)).toEqual([]);
+    expect(resolveMenus([], 'static').source).toBe('static');
   });
 });

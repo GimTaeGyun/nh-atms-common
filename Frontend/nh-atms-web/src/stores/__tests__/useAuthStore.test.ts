@@ -1,39 +1,43 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { selectIsAdmin, selectIsSsoUser, useAuthStore } from '../useAuthStore';
-import type { UserInfo } from '@/types/auth';
+import { selectIsAdmin, selectOfcCode, useAuthStore } from '../useAuthStore';
+import { MOCK_ME, ME_001_MESSAGE, setMockMeFail } from '@/mocks/handlers/me';
 
-const admin: UserInfo = { userId: 'admin', userName: '관리자', deptName: 'IT운영팀', roleId: 'ROLE_ADMIN' };
-
-describe('useAuthStore — 현 백엔드 응답 대응', () => {
-  beforeEach(() => useAuthStore.getState().logout('manual'));
-
-  it('권한코드 ROLE_ADMIN(현 백엔드)·ADMIN·adminYn=Y 를 관리자로 본다', () => {
-    useAuthStore.getState().login({ accessToken: 'a', refreshToken: 'r', user: admin });
-    expect(selectIsAdmin(useAuthStore.getState())).toBe(true);
-    useAuthStore.getState().login({ accessToken: 'a', refreshToken: 'r', user: { ...admin, roleId: 'ROLE_USER' } });
-    expect(selectIsAdmin(useAuthStore.getState())).toBe(false);
-    useAuthStore.getState().login({ accessToken: 'a', refreshToken: 'r', user: { ...admin, roleId: 'ROLE_USER', adminYn: 'Y' } });
-    expect(selectIsAdmin(useAuthStore.getState())).toBe(true);
+describe('useAuthStore — 고정 사용자(/api/me)', () => {
+  beforeEach(() => {
+    setMockMeFail(false);
+    useAuthStore.setState({ me: null, status: 'idle', error: null });
   });
 
-  it('토큰 갱신 응답의 빈 사용자 항목(userName·roleId=null)이 기존 값을 지우지 않는다', () => {
-    useAuthStore.getState().login({ accessToken: 'a', refreshToken: 'r', user: admin });
-    const refreshed = { userId: 'admin', userName: null, deptName: 'IT운영팀', roleId: null } as unknown as UserInfo;
-    useAuthStore.getState().setTokens({ accessToken: 'a2', refreshToken: 'r2' }, refreshed);
+  it('loadMe 가 /api/me 를 읽어 나·사무소·관리자 여부를 채운다', async () => {
+    await useAuthStore.getState().loadMe();
     const s = useAuthStore.getState();
-    expect(s.accessToken).toBe('a2');
-    expect(s.user).toMatchObject({ userName: '관리자', roleId: 'ROLE_ADMIN', deptName: 'IT운영팀' });
-    expect(selectIsAdmin(s)).toBe(true);
+    expect(s.status).toBe('ready');
+    expect(s.me).toEqual(MOCK_ME);
+    expect(selectOfcCode(s)).toBe(MOCK_ME.ofcCode);
+    expect(selectIsAdmin(s)).toBe(false);
   });
 
-  it('로그인 방식(loginType)은 응답값을 따르고 없으면 LOCAL, 로그아웃해도 남는다(세션 종료 화면 분기용)', () => {
-    useAuthStore.getState().login({ accessToken: 'a', refreshToken: 'r', user: admin });
-    expect(useAuthStore.getState().loginType).toBe('LOCAL');
-    expect(selectIsSsoUser(useAuthStore.getState())).toBe(false);
-    useAuthStore.getState().login({ accessToken: 'a', refreshToken: 'r', user: admin, loginType: 'SSO' });
-    expect(selectIsSsoUser(useAuthStore.getState())).toBe(true);
-    useAuthStore.getState().logout('idle');
-    expect(useAuthStore.getState().isAuthenticated).toBe(false);
-    expect(useAuthStore.getState().loginType).toBe('SSO');
+  it('adminYn=Y 면 관리자', () => {
+    useAuthStore.getState().setMe({ ...MOCK_ME, adminYn: 'Y' });
+    expect(selectIsAdmin(useAuthStore.getState())).toBe(true);
+  });
+
+  it('401 ME_001 이면 status=error + 서버 문구·코드를 담는다(되돌이 없음)', async () => {
+    setMockMeFail(true);
+    await useAuthStore.getState().loadMe();
+    const s = useAuthStore.getState();
+    expect(s.status).toBe('error');
+    expect(s.me).toBeNull();
+    expect(s.error).toEqual({ code: 'ME_001', message: ME_001_MESSAGE });
+    expect(selectOfcCode(s)).toBe('');
+  });
+
+  it('이미 읽었으면 force 없이는 다시 읽지 않는다', async () => {
+    useAuthStore.getState().setMe(MOCK_ME);
+    setMockMeFail(true);
+    await useAuthStore.getState().loadMe();
+    expect(useAuthStore.getState().status).toBe('ready');
+    await useAuthStore.getState().loadMe(true);
+    expect(useAuthStore.getState().status).toBe('error');
   });
 });

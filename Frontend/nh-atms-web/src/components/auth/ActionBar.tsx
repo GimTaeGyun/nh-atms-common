@@ -32,20 +32,24 @@ interface ActionDef {
   confirm?: string;
 }
 
-/** 버튼별 기본 라벨·아이콘·권한 (조회성 = read, 변경성 = write) */
+/**
+ * 버튼별 기본 라벨·아이콘·필요 권한(설계 §5.5 표, Q2 결정).
+ * search·open·close·excel·print·report → qry / create → reg / update·save → upd / delete → del / urgent → exe.
+ * reset(조회조건 초기화)은 자료를 바꾸지 않으므로 qry.
+ */
 export const ACTION_DEFS: Record<ActionKey, ActionDef> = {
-  search: { label: '조회', icon: <SearchOutlined />, need: 'read', type: 'primary' },
-  excel: { label: '엑셀', icon: <FileExcelOutlined />, need: 'read' },
-  save: { label: '저장', icon: <SaveOutlined />, need: 'write', type: 'primary' },
-  reset: { label: '초기화', icon: <UndoOutlined />, need: 'write' },
-  print: { label: '출력', icon: <PrinterOutlined />, need: 'read' },
-  create: { label: '등록', icon: <PlusOutlined />, need: 'write' },
-  update: { label: '수정', icon: <EditOutlined />, need: 'write' },
-  delete: { label: '삭제', icon: <DeleteOutlined />, need: 'write', danger: true, confirm: CMSG.delete },
-  open: { label: '열기', icon: <FolderOpenOutlined />, need: 'read' },
-  close: { label: '닫기', icon: <CloseOutlined />, need: 'read' },
-  urgent: { label: '긴급', icon: <AlertOutlined />, need: 'write', danger: true },
-  report: { label: '보고서', icon: <FileTextOutlined />, need: 'read' },
+  search: { label: '조회', icon: <SearchOutlined />, need: 'qry', type: 'primary' },
+  excel: { label: '엑셀', icon: <FileExcelOutlined />, need: 'qry' },
+  save: { label: '저장', icon: <SaveOutlined />, need: 'upd', type: 'primary' },
+  reset: { label: '초기화', icon: <UndoOutlined />, need: 'qry' },
+  print: { label: '출력', icon: <PrinterOutlined />, need: 'qry' },
+  create: { label: '등록', icon: <PlusOutlined />, need: 'reg' },
+  update: { label: '수정', icon: <EditOutlined />, need: 'upd' },
+  delete: { label: '삭제', icon: <DeleteOutlined />, need: 'del', danger: true, confirm: CMSG.delete },
+  open: { label: '열기', icon: <FolderOpenOutlined />, need: 'qry' },
+  close: { label: '닫기', icon: <CloseOutlined />, need: 'qry' },
+  urgent: { label: '긴급', icon: <AlertOutlined />, need: 'exe', danger: true },
+  report: { label: '보고서', icon: <FileTextOutlined />, need: 'qry' },
 };
 
 export interface ActionItem {

@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useTabStore } from '@/stores/useTabStore';
 import { MAX_OPEN_TABS } from '@/config/constants';
+import { HOME_SCREEN_KEY, type ScreenKey } from '@/screens/screenIds';
 
-import { screenPath } from '@/screens/registry';
-import { HOME_SCREEN_KEY, SCREEN_IDS, type ScreenKey } from '@/screens/screenIds';
-
-const KEYS = Object.keys(SCREEN_IDS).filter((k) => k !== HOME_SCREEN_KEY && !k.startsWith('popup.')) as ScreenKey[];
-const open = (key: ScreenKey) => useTabStore.getState().open({ screenKey: key, title: `T${key}`, path: screenPath(key), closable: true });
+/** 탭 스토어는 화면키 문자열만 본다 — 최대 개수 시험용으로 가짜 키를 쓴다 */
+const fake = (i: number) => `sample.fake${i}` as ScreenKey;
+const open = (key: ScreenKey) => useTabStore.getState().open({ screenKey: key, title: `T${key}`, path: `/sample/${key}`, closable: true });
 
 describe('useTabStore', () => {
   beforeEach(() => useTabStore.getState().reset());
@@ -18,27 +17,27 @@ describe('useTabStore', () => {
   });
 
   it('동일 화면은 1인스턴스(활성화만), 닫으면 이웃 탭 활성화', () => {
-    open('mgmt.faultStatus');
-    open('mgmt.faultHistory');
-    open('mgmt.faultStatus');
+    open('sample.notice');
+    open('sample.mcnInfo');
+    open('sample.notice');
     expect(useTabStore.getState().tabs).toHaveLength(3);
-    expect(useTabStore.getState().activeKey).toBe('mgmt.faultStatus');
-    const next = useTabStore.getState().close('mgmt.faultStatus');
-    expect(next).toBe('mgmt.faultHistory');
-    expect(useTabStore.getState().activeKey).toBe('mgmt.faultHistory');
+    expect(useTabStore.getState().activeKey).toBe('sample.notice');
+    const next = useTabStore.getState().close('sample.notice');
+    expect(next).toBe('sample.mcnInfo');
+    expect(useTabStore.getState().activeKey).toBe('sample.mcnInfo');
   });
 
   it('최대 개수 초과 시 거부', () => {
-    for (let i = 1; i < MAX_OPEN_TABS; i++) expect(open(KEYS[i])).toBe(true);
-    expect(open(KEYS[MAX_OPEN_TABS + 1])).toBe(false);
+    for (let i = 1; i < MAX_OPEN_TABS; i++) expect(open(fake(i))).toBe(true);
+    expect(open(fake(MAX_OPEN_TABS + 1))).toBe(false);
   });
 
   it('다른 탭 닫기 / 오른쪽 탭 닫기 / 전체 닫기', () => {
-    (['mgmt.faultStatus', 'mgmt.faultHistory', 'mgmt.cashStatus', 'journal.journalList'] as ScreenKey[]).forEach(open);
-    useTabStore.getState().closeRight('mgmt.faultHistory');
-    expect(useTabStore.getState().tabs.map((t) => t.key)).toEqual([HOME_SCREEN_KEY, 'mgmt.faultStatus', 'mgmt.faultHistory']);
-    useTabStore.getState().closeOthers('mgmt.faultStatus');
-    expect(useTabStore.getState().tabs.map((t) => t.key)).toEqual([HOME_SCREEN_KEY, 'mgmt.faultStatus']);
+    (['sample.commonModules', 'sample.notice', 'sample.mcnInfo', 'sample.mcnModel'] as ScreenKey[]).forEach(open);
+    useTabStore.getState().closeRight('sample.notice');
+    expect(useTabStore.getState().tabs.map((t) => t.key)).toEqual([HOME_SCREEN_KEY, 'sample.commonModules', 'sample.notice']);
+    useTabStore.getState().closeOthers('sample.commonModules');
+    expect(useTabStore.getState().tabs.map((t) => t.key)).toEqual([HOME_SCREEN_KEY, 'sample.commonModules']);
     useTabStore.getState().closeAll();
     expect(useTabStore.getState().tabs.map((t) => t.key)).toEqual([HOME_SCREEN_KEY]);
     expect(useTabStore.getState().activeKey).toBe(HOME_SCREEN_KEY);

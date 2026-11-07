@@ -42,7 +42,7 @@ describe('ApprovalRequestModal', () => {
 
 describe('ApproverKeyInModal', () => {
   beforeEach(() => {
-    useAuthStore.getState().login({ accessToken: 'a', refreshToken: 'r', user: { userId: 'u100', userName: '요청자', deptName: '영업점', roleId: 'ROLE_USER' } });
+    useAuthStore.getState().setMe({ perNo: 'u100', name: '요청자', samuso: '000001', samusoName: '영업점', deptCode: null, ofcCode: '000001', kanm: '영업점', auth: 'T', adminYn: 'N' });
   });
 
   it('요청자와 같은 사번은 거부하고, 다른 사번이면 onApprove', async () => {
@@ -57,7 +57,7 @@ describe('ApproverKeyInModal', () => {
     await userEvent.clear(screen.getByPlaceholderText('책임자 사번'));
     await userEvent.type(screen.getByPlaceholderText('책임자 사번'), 'm200');
     await userEvent.click(screen.getByRole('button', { name: '승인' }));
-    await waitFor(() => expect(onApprove).toHaveBeenCalledWith({ empNo: 'm200', password: 'pw!' }));
+    await waitFor(() => expect(onApprove).toHaveBeenCalledWith({ perNo: 'm200', password: 'pw!' }));
   });
 
   it('승인 실패 시 오류 표시 + 비밀번호 초기화', async () => {

@@ -47,9 +47,9 @@ export const FavoritesPopover = ({ placement = 'bottomLeft', trigger = 'click', 
           </div>
           {favNodes.length === 0 && <div className="panel-empty">즐겨찾기한 화면이 없습니다. 메뉴의 ★ 을 눌러 추가하세요.</div>}
           {favNodes.map((n) => (
-            <button key={n.screenKey} type="button" className="panel-leaf" onClick={() => go(n.screenKey!)} title={`${n.screenId} ${n.menuName}`}>
+            <button key={n.screenKey} type="button" className="panel-leaf" onClick={() => go(n.screenKey!)} title={n.menuNm}>
               <StarFilled className="star fav" />
-              <span className="nm">{n.menuName}</span>
+              <span className="nm">{n.menuNm}</span>
               {edit && <CloseOutlined className="rm" aria-label="즐겨찾기 삭제" onClick={(e) => { e.stopPropagation(); toggleFav(n.screenKey!); }} />}
             </button>
           ))}
@@ -57,8 +57,8 @@ export const FavoritesPopover = ({ placement = 'bottomLeft', trigger = 'click', 
           <div className="fav-pop-head"><span>최근 방문한 페이지</span></div>
           {recentNodes.length === 0 && <div className="panel-empty">최근 방문한 화면이 없습니다.</div>}
           {recentNodes.map((n) => (
-            <button key={n.screenKey} type="button" className="panel-leaf" onClick={() => go(n.screenKey!)} title={`${n.screenId} ${n.menuName}`}>
-              <span className="nm">{n.menuName}</span>
+            <button key={n.screenKey} type="button" className="panel-leaf" onClick={() => go(n.screenKey!)} title={n.menuNm}>
+              <span className="nm">{n.menuNm}</span>
             </button>
           ))}
           {recentNodes.length > 0 && (

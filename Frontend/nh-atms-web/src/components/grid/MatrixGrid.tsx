@@ -54,7 +54,7 @@ const show = (v: CellValue): ReactNode => (isNum(v) ? fmtAmount(v) : v);
 const addNum = (acc: number | undefined, v: unknown) => (isNum(v) ? (acc ?? 0) + v : acc);
 
 /**
- * 고정행 매트릭스 (AS-IS 2101/2102 집계, 5130 운영현황).
+ * 고정행 매트릭스 (집계·운영현황형 표).
  *  - 행 헤더(+선택적 그룹) 좌측 고정, 열 헤더 2단 지원
  *  - totals 로 행/열 숫자 합계, highlight 로 셀 강조(mx-danger/mx-warning)
  */

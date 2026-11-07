@@ -13,7 +13,5 @@ export interface ValueProps<T> {
   disabled?: boolean;
 }
 
-/** 합계후(AFTER)/합계전(BEFORE) — AS-IS 거래일자 조건 */
-export type TotalFlag = 'AFTER' | 'BEFORE';
 /** 기간 단위 일별/월별 */
 export type PeriodUnit = 'DAY' | 'MONTH';

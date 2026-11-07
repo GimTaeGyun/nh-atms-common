@@ -19,7 +19,7 @@ interface Props {
   className?: string;
 }
 
-/** 라벨/값 표 그리드 — 상세 팝업(9101)·등록 폼(9300)의 공통 레이아웃 */
+/** 라벨/값 표 그리드 — 상세 팝업·등록 폼의 공통 레이아웃 */
 export const DetailGrid = ({ items, cols = 2, labelWidth = 130, style, className }: Props) => {
   const template = Array.from({ length: cols }, () => `${labelWidth}px minmax(0, 1fr)`).join(' ');
   return (

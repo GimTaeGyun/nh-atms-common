@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 검증 어노테이션의 message 에는 응답코드를 쓴다(예: {@code @NotBlank(message = "VAL_101")}).
+     * 검증 어노테이션의 message 에는 응답코드를 쓴다(예: {@code @NotBlank(message = 응답코드)} — 코드는 api-messages.tsv 에 먼저 추가).
      * 코드가 아니면(어노테이션 기본 문구) VAL_001 "입력값이 올바르지 않습니다: {필드}" 로 내려준다.
      */
     static ApiResponse<Void> fieldError(FieldError fe) {

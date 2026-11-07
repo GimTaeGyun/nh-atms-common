@@ -1,17 +1,17 @@
 import type { ReactNode } from 'react';
 import { useOpenScreen } from '@/screens/navigation';
-import { screenIdOf, type ScreenKey } from '@/screens/screenIds';
+import { getScreen, screenPath } from '@/screens/registry';
+import type { ScreenKey } from '@/screens/screenIds';
 
 /**
- * 안내문 속 화면번호 링크 — AS-IS '26-1005' 처럼 적힌 번호를 누르면 그 화면 탭을 연다.
- * 글자를 주지 않으면 '26-{ID}' 로 표시한다.
+ * 안내문 속 화면 링크 — 누르면 그 화면 탭을 연다. 글자를 주지 않으면 레지스트리 제목(없으면 화면키)을 보인다.
+ * 화면번호는 쓰지 않는다(설계 Q9).
  */
-export const ScreenLink = ({ screenKey, children, prefix = '26-' }: { screenKey: ScreenKey; children?: ReactNode; prefix?: string }) => {
-  const screenId = screenIdOf(screenKey);
+export const ScreenLink = ({ screenKey, children }: { screenKey: ScreenKey; children?: ReactNode }) => {
   const openScreen = useOpenScreen();
   return (
-    <a className="screen-link" onClick={(e) => { e.preventDefault(); openScreen(screenKey); }} href={`#${screenId}`}>
-      {children ?? `${prefix}${screenId}`}
+    <a className="screen-link" onClick={(e) => { e.preventDefault(); openScreen(screenKey); }} href={screenPath(screenKey)}>
+      {children ?? getScreen(screenKey)?.title ?? screenKey}
     </a>
   );
 };

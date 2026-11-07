@@ -2,9 +2,8 @@ import type { ReactNode } from 'react';
 import type { ColumnType, ColumnGroupType } from 'antd/es/table';
 import { fmtAmount, fmtCount, fmtDate, fmtDateTime, fmtPercent, fmtTime } from '@/utils/format';
 import type { ExcelColumn } from '@/utils/excel';
-import { AtmStatusTag, ResultTag, YnIcon } from '@/components/display/StatusTag';
+import { ResultTag, YnIcon } from '@/components/display/StatusTag';
 import { Stack } from '@/components/display/Stack';
-import { ATM_STATUS_LABEL, type AtmStatusCd } from '@/domain/types';
 
 /** 엑셀 추출 힌트: 함수면 그 값을, false 면 엑셀에서 제외(순번·버튼 컬럼) */
 export type ExcelHint<T> = ((row: T) => unknown) | false;
@@ -84,15 +83,6 @@ export const ynCol = <T,>(title: string, dataIndex: keyof T | string, width = 60
 export const resultCol = <T,>(title: string, dataIndex: keyof T | string, width = 90, extra: Partial<Col<T>> = {}): Col<T> =>
   centerCol(title, dataIndex, width, { render: (v: unknown) => <ResultTag value={v as string} />, ...extra });
 
-/** 기기 상태 태그 컬럼 (00/01/02/03/09). text=true 면 알약 배경 없이 글자만. 엑셀은 상태명 */
-export const atmStatusCol = <T,>(title: string, dataIndex: keyof T | string, width = 90, extra: Partial<Col<T>> & { text?: boolean } = {}): Col<T> => {
-  const { text, ...rest } = extra;
-  return centerCol(title, dataIndex, width, {
-    render: (v: unknown) => <AtmStatusTag status={v as string} text={text} />,
-    excel: (r) => { const v = (r as Record<string, unknown>)[dataIndex as string] as AtmStatusCd; return ATM_STATUS_LABEL[v] ?? String(v ?? ''); },
-    ...rest,
-  });
-};
 
 /** 다단(2~3줄) 복합 셀 컬럼. 엑셀은 ' / ' 로 이어 붙임 */
 export const stackCol = <T,>(title: string, width: number, lines: (r: T) => (string | number | undefined | null)[], extra: Partial<Col<T>> = {}): Col<T> => ({

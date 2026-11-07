@@ -38,7 +38,7 @@ const TIMEOUT_MSG = '기기 응답 시간이 초과되었습니다. 실행결과
 const errText = (e: unknown, fallback: string) => (e instanceof Error && e.message ? e.message : fallback);
 
 /**
- * 원격명령 발행 → cmdId → 상태 폴링 → 완료/실패/시간초과 (2000 개국/합계 등록, 3100 리셋 명령 등).
+ * 원격명령 발행 → cmdId → 상태 폴링 → 완료/실패/시간초과 (개국/합계 등록, 리셋 명령 등).
  * 화면을 닫으면(언마운트) 폴링을 멈춘다. 다시 run() 하면 이전 폴링은 취소된다.
  */
 export const useCommandPoll = <A = void, R = unknown>(options: UseCommandPollOptions<A, R>) => {

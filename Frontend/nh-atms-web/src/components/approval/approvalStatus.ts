@@ -13,7 +13,7 @@ export const APPROVAL_STATUS: Record<ApprovalStatus, { label: string; tone: Tone
 
 /** 승인 KEY-IN 입력값 */
 export interface ApproverCredential {
-  empNo: string;
+  perNo: string;
   password: string;
 }
 

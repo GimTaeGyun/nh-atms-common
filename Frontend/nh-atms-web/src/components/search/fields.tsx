@@ -1,25 +1,31 @@
 /**
- * 공통 조회조건 컨트롤 — 전 화면에서 반복되는 AS-IS 조건(사무소/기번/합계후전 기간/시간/코드)을
- * value/onChange 컨트롤 + SearchField 팩토리로 제공한다. (마스터플랜 §5.1 common/search)
+ * 공통 조회조건 컨트롤 — 전 화면에서 반복되는 조건(사무소/기번/시간/기간/공통코드)을
+ * value/onChange 컨트롤 + SearchField 팩토리로 제공한다. [원본] nh-atms `components/search/fields.tsx`.
+ * 필드 이름은 TO-BE 컬럼 camelCase(설계 Q5): 사무소 `ofcCode`, 기번 `mcnNo`.
+ * 콤보 원천은 공통 조회 API(`/api/lookup/*`, api/endpoints/lookup.ts).
  */
 import { useMemo, useState } from 'react';
 import { Button, DatePicker, Form, Input, Select, Space } from 'antd';
 import type { FormInstance } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
-import { useAtms, useCodes, useOffices } from '@/hooks/useCodes';
-import { useAuthStore, selectOfficeCd } from '@/stores/useAuthStore';
+import { useCodes } from '@/hooks/useCodes';
+import { useMcns, useOffices } from '@/hooks/useLookup';
+import { useAuthStore, selectOfcCode } from '@/stores/useAuthStore';
 import { timeOptions, today } from '@/utils/date';
 import { fmtOffice } from '@/utils/format';
 import type { SearchField } from './SearchForm';
 import { OfficeSearchModal } from './OfficeSearchModal';
-import type { Office } from '@/domain/types';
-import type { PeriodUnit, TotalFlag, ValueProps } from '@/types/common';
+import type { Office } from '@/domain/lookup';
+import type { PeriodUnit, ValueProps } from '@/types/common';
 import { VMSG } from '@/config/messages';
 
 export type { ValueProps };
 
-/* ---------- 사무소 선택: 셀렉트([코드] 명) + 코드 직접입력 + 돋보기 ---------- */
+/** 사무소코드 6자리 정규화(앞자리 0 채움) — 서버 OfficeCode.norm 과 같은 규칙 */
+export const normOfcCode = (v: string): string => (v ? v.replace(/\D/g, '').padStart(6, '0') : '');
+
+/* ---------- 사무소 선택: 셀렉트([코드] 명) + 코드 직접입력 + 돋보기 팝업 ---------- */
 export const OfficeSelector = ({ value, onChange, disabled, allowEmpty }: ValueProps<string | undefined> & { allowEmpty?: boolean }) => {
   const { data: offices = [] } = useOffices();
   const [code, setCode] = useState(value ?? '');
@@ -30,21 +36,21 @@ export const OfficeSelector = ({ value, onChange, disabled, allowEmpty }: ValueP
     setCode(value ?? '');
   }
   const apply = () => {
-    const hit = offices.find((o) => o.officeCd === code.padStart(6, '0'));
-    if (hit) onChange?.(hit.officeCd);
+    const hit = offices.find((o) => o.ofcCode === normOfcCode(code));
+    if (hit) onChange?.(hit.ofcCode);
   };
   const select = (o: Office) => {
-    onChange?.(o.officeCd);
-    setCode(o.officeCd);
+    onChange?.(o.ofcCode);
+    setCode(o.ofcCode);
   };
   return (
     <>
       <Space.Compact style={{ width: '100%' }}>
         <Select
-          value={value}
+          value={value || undefined}
           disabled={disabled}
           onChange={(v) => { onChange?.(v); setCode(v ?? ''); }}
-          options={offices.map((o) => ({ value: o.officeCd, label: fmtOffice(o.officeCd, o.officeName) }))}
+          options={offices.map((o) => ({ value: o.ofcCode, label: fmtOffice(o.ofcCode, o.kanm) }))}
           showSearch
           optionFilterProp="label"
           allowClear={allowEmpty}
@@ -56,6 +62,7 @@ export const OfficeSelector = ({ value, onChange, disabled, allowEmpty }: ValueP
           maxLength={6}
           placeholder="코드"
           disabled={disabled}
+          aria-label="사무소코드"
           style={{ width: 66, textAlign: 'center' }}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
           onBlur={apply}
@@ -74,35 +81,17 @@ export const OfficeSelector = ({ value, onChange, disabled, allowEmpty }: ValueP
   );
 };
 
-/* ---------- 기번: 사무소에 종속되는 셀렉트 ---------- */
-export const AtmSelect = ({ value, onChange, disabled, form, officeField = 'officeCd', allowAll = true }: ValueProps<string | undefined> & { form: FormInstance; officeField?: string; allowAll?: boolean }) => {
-  const officeCd = Form.useWatch(officeField, form) as string | undefined;
-  const { data: atms = [], isFetching } = useAtms(officeCd);
-  const options = useMemo(() => atms.map((a) => ({ value: a.termId, label: `${a.termId}  ${a.modelName}` })), [atms]);
+/* ---------- 기번(기기): 사무소에 종속되는 셀렉트 ---------- */
+/**
+ * 기번 콤보 — 같은 폼의 사무소 칸(`officeField`, 기본 'ofcCode')을 보고 `GET /api/lookup/machines?ofcCode=` 로 채운다.
+ * 사무소가 없으면 비활성. 목록에 없는 값은 비워 보인다. 라벨 '기번  코너명'.
+ */
+export const McnSelect = ({ value, onChange, disabled, form, officeField = 'ofcCode', allowAll = true, placeholder }: ValueProps<string | undefined> & { form: FormInstance; officeField?: string; allowAll?: boolean; placeholder?: string }) => {
+  const ofcCode = Form.useWatch(officeField, form) as string | undefined;
+  const { data: rows = [], isFetching } = useMcns(ofcCode);
+  const options = useMemo(() => rows.map((m) => ({ value: m.mcnNo, label: m.instPstNm ? `${m.mcnNo}  ${m.instPstNm}` : m.mcnNo })), [rows]);
   const shown = options.some((o) => o.value === value) ? value : undefined;
-  return <Select value={shown} onChange={onChange} options={options} loading={isFetching} allowClear={allowAll} placeholder={allowAll ? '전체' : '기번 선택'} disabled={disabled || !officeCd} showSearch optionFilterProp="label" style={{ width: '100%' }} />;
-};
-
-/* ---------- 거래일자 From/To + 합계후/합계전 ---------- */
-export interface DateRangeTotalValue {
-  from?: Dayjs;
-  fromTotal: TotalFlag;
-  to?: Dayjs;
-  toTotal: TotalFlag;
-}
-const TOTAL_OPTS = [{ value: 'AFTER', label: '합계후' }, { value: 'BEFORE', label: '합계전' }];
-export const DateRangeWithTotal = ({ value, onChange, disabled }: ValueProps<DateRangeTotalValue | undefined>) => {
-  const v: DateRangeTotalValue = value ?? { fromTotal: 'AFTER', toTotal: 'BEFORE' };
-  const set = (patch: Partial<DateRangeTotalValue>) => onChange?.({ ...v, ...patch });
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: '100%' }}>
-      <DatePicker value={v.from} onChange={(d) => set({ from: d ?? undefined })} disabled={disabled} style={{ flex: 1, minWidth: 104 }} allowClear={false} />
-      <Select value={v.fromTotal} onChange={(t) => set({ fromTotal: t })} options={TOTAL_OPTS} disabled={disabled} style={{ width: 84 }} />
-      <span className="muted">~</span>
-      <DatePicker value={v.to} onChange={(d) => set({ to: d ?? undefined })} disabled={disabled} style={{ flex: 1, minWidth: 104 }} allowClear={false} />
-      <Select value={v.toTotal} onChange={(t) => set({ toTotal: t })} options={TOTAL_OPTS} disabled={disabled} style={{ width: 84 }} />
-    </div>
-  );
+  return <Select value={shown} onChange={onChange} options={options} loading={isFetching} allowClear={allowAll} placeholder={placeholder ?? (allowAll ? '전체' : '기번 선택')} disabled={disabled || !ofcCode} showSearch optionFilterProp="label" style={{ width: '100%' }} />;
 };
 
 /* ---------- 시간 범위 (HH:mm select) ---------- */
@@ -137,16 +126,17 @@ export const PeriodPicker = ({ value, onChange, disabled }: ValueProps<PeriodVal
   );
 };
 
-/* ---------- 공통코드 셀렉트 ---------- */
-export const CodeSelect = ({ value, onChange, disabled, groupCd, allLabel = '전체', allowAll = true, placeholder }: ValueProps<string | undefined> & { groupCd: string; allLabel?: string; allowAll?: boolean; placeholder?: string }) => {
-  const { options, isFetching } = useCodes(groupCd);
+/* ---------- 공통코드 셀렉트 (TB_CO_CODE 코드구분) ---------- */
+export const CodeSelect = ({ value, onChange, disabled, codeType, allLabel = '전체', allowAll = true, placeholder }: ValueProps<string | undefined> & { codeType: string; allLabel?: string; allowAll?: boolean; placeholder?: string }) => {
+  const { options, isFetching } = useCodes(codeType);
   const opts = allowAll ? [{ value: 'ALL', label: allLabel }, ...options] : options;
-  return <Select value={value} onChange={onChange} options={opts} loading={isFetching} disabled={disabled} placeholder={placeholder} style={{ width: '100%' }} />;
+  return <Select value={value} onChange={onChange} options={opts} loading={isFetching} disabled={disabled} placeholder={placeholder} showSearch optionFilterProp="label" style={{ width: '100%' }} />;
 };
 
 /* ---------- SearchField 팩토리 ---------- */
+/** 사무소 (이름 'ofcCode', 기본 필수). 기본값은 화면에서 `defaultValue: 내 사무소` 로 — useOfficeMcnFields 참고 */
 export const officeField = (opts: Partial<SearchField> & { defaultValue?: string } = {}): SearchField => ({
-  name: 'officeCd',
+  name: 'ofcCode',
   label: '사무소',
   type: 'custom',
   widthClass: 'long',
@@ -155,23 +145,13 @@ export const officeField = (opts: Partial<SearchField> & { defaultValue?: string
   ...opts,
 });
 
-export const atmField = (opts: Partial<SearchField> = {}): SearchField => ({
-  name: 'termId',
+/** 기번 (이름 'mcnNo', 사무소 칸 종속 — officeField 이름을 바꿨으면 opts.officeField 로) */
+export const mcnField = ({ officeField: ofcName = 'ofcCode', ...opts }: Partial<SearchField> & { officeField?: string } = {}): SearchField => ({
+  name: 'mcnNo',
   label: '기번',
   type: 'custom',
   widthClass: 'normal',
-  render: (form) => <AtmSelect form={form} officeField={(opts as { officeField?: string }).officeField ?? 'officeCd'} />,
-  ...opts,
-});
-
-export const dateTotalField = (opts: Partial<SearchField> = {}): SearchField => ({
-  name: 'period',
-  label: '거래일자',
-  type: 'custom',
-  widthClass: 'wide',
-  required: true,
-  rules: [{ validator: (_r, v?: DateRangeTotalValue) => (v?.from && v?.to ? Promise.resolve() : Promise.reject(new Error(VMSG.required('거래일자')))) }],
-  render: () => <DateRangeWithTotal />,
+  render: (form) => <McnSelect form={form} officeField={ofcName} />,
   ...opts,
 });
 
@@ -187,7 +167,7 @@ export const timeRangeField = (opts: Partial<SearchField> = {}): SearchField => 
 
 export const periodField = (opts: Partial<SearchField> = {}): SearchField => ({
   name: 'period',
-  label: '거래일자',
+  label: '기간',
   type: 'custom',
   widthClass: 'range',
   required: true,
@@ -196,13 +176,14 @@ export const periodField = (opts: Partial<SearchField> = {}): SearchField => ({
   ...opts,
 });
 
-export const codeField = (name: string, label: string, groupCd: string, opts: Partial<SearchField> = {}): SearchField => ({
+/** 공통코드 콤보 (기본값 'ALL' = 전체) */
+export const codeField = (name: string, label: string, codeType: string, opts: Partial<SearchField> = {}): SearchField => ({
   name,
   label,
   type: 'custom',
   widthClass: 'normal',
   defaultValue: 'ALL',
-  render: () => <CodeSelect groupCd={groupCd} />,
+  render: () => <CodeSelect codeType={codeType} />,
   ...opts,
 });
 
@@ -229,16 +210,16 @@ export const dateField = (name = 'date', label = '조회일자', opts: Partial<S
 });
 
 /**
- * 가장 흔한 조건 묶음: 사무소(로그인 사무소 기본) + 기번 [+ 조회일자].
- * 훅이므로 컴포넌트 본문에서 호출한다. 예: `const fields = useOfficeAtmFields({ date: true })`
+ * 가장 흔한 조건 묶음: 사무소(내 사무소 기본) + 기번 [+ 조회일자].
+ * 훅이므로 컴포넌트 본문에서 호출한다. 예: `const fields = useOfficeMcnFields({ date: true })`
  */
-export const useOfficeAtmFields = (opts: { date?: boolean | string; officeLabel?: string; atm?: boolean; extra?: SearchField[] } = {}): SearchField[] => {
-  const officeCd = useAuthStore(selectOfficeCd);
-  const { date, officeLabel, atm = true, extra } = opts;
+export const useOfficeMcnFields = (opts: { date?: boolean | string; officeLabel?: string; mcn?: boolean; extra?: SearchField[] } = {}): SearchField[] => {
+  const ofcCode = useAuthStore(selectOfcCode);
+  const { date, officeLabel, mcn = true, extra } = opts;
   return useMemo(() => {
-    const out: SearchField[] = [officeField({ defaultValue: officeCd, ...(officeLabel ? { label: officeLabel } : {}) })];
-    if (atm) out.push(atmField());
+    const out: SearchField[] = [officeField({ defaultValue: ofcCode || undefined, ...(officeLabel ? { label: officeLabel } : {}) })];
+    if (mcn) out.push(mcnField());
     if (date) out.push(dateField('date', typeof date === 'string' ? date : '조회일자'));
     return extra ? [...out, ...extra] : out;
-  }, [officeCd, date, officeLabel, atm, extra]);
+  }, [ofcCode, date, officeLabel, mcn, extra]);
 };

@@ -63,7 +63,7 @@ export const OpenTabBar = () => {
               onAuxClick={(e) => {
                 if (e.button === 1 && tab.closable) doClose(tab.key);
               }}
-              title={`${tab.screenId} ${tab.title}`}
+              title={tab.title}
             >
               {!tab.closable && <HomeOutlined />}
               <span className="ttl">{tab.title}</span>

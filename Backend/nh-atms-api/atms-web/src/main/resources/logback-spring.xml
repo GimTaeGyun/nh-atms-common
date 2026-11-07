@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 로깅 구성 — [원본] nh-atms atms-web logback-spring.xml (프로파일 이름만 nh → jeus)
+     - jeus(은행 개발서버 JEUS): FILE 어펜더만 — JEUS ServerLog(stdout 리다이렉트)와의 이중 기록 방지.
+       경로는 logging.file.name(application-jeus.yml), 롤링은 logging.logback.rollingpolicy.*(jeus-common.yml).
+     - 그 외(local 등): CONSOLE 만. -->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <springProfile name="jeus">
+        <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-.}/spring.log}"/>
+        <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+    <springProfile name="!jeus">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>

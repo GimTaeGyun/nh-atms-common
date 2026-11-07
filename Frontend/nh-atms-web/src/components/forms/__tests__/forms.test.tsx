@@ -12,7 +12,7 @@ const wrap = (ui: ReactNode) => render(
   </ConfigProvider>,
 );
 
-const PersonHost = ({ lookup, onParentKey, onResolved }: { lookup: (n: string) => Promise<PersonInfo | null>; onParentKey: (e: KeyboardEvent) => void; onResolved?: (p: PersonInfo | null) => void }) => {
+const PersonHost = ({ lookup, onParentKey, onResolved }: { lookup?: (n: string) => Promise<PersonInfo | null>; onParentKey: (e: KeyboardEvent) => void; onResolved?: (p: PersonInfo | null) => void }) => {
   const [v, setV] = useState('');
   return (
     <form onKeyDown={onParentKey} onSubmit={(e) => e.preventDefault()}>
@@ -23,7 +23,7 @@ const PersonHost = ({ lookup, onParentKey, onResolved }: { lookup: (n: string) =
 
 describe('PersonNoInput', () => {
   it('Enter → lookup 호출, 성명 표시, Enter 는 상위 폼으로 전파되지 않는다', async () => {
-    const lookup = vi.fn(async (empNo: string) => ({ empNo, name: '홍길동', deptName: '디지털전략부' }));
+    const lookup = vi.fn(async (perNo: string) => ({ perNo, name: '홍길동', deptName: '디지털전략부' }));
     const onParentKey = vi.fn();
     const onResolved = vi.fn();
     wrap(<PersonHost lookup={lookup} onParentKey={onParentKey} onResolved={onResolved} />);
@@ -35,7 +35,7 @@ describe('PersonNoInput', () => {
     expect(lookup).toHaveBeenCalledWith('05300000');
     expect(await screen.findByText('홍길동')).toBeInTheDocument();
     expect(screen.getByText('(디지털전략부)')).toBeInTheDocument();
-    expect(onResolved).toHaveBeenLastCalledWith({ empNo: '05300000', name: '홍길동', deptName: '디지털전략부' });
+    expect(onResolved).toHaveBeenLastCalledWith({ perNo: '05300000', name: '홍길동', deptName: '디지털전략부' });
     // 글자 입력 키는 전파되지만 Enter 는 막힌다
     expect(onParentKey).toHaveBeenCalled();
     expect(onParentKey.mock.calls.some(([e]) => (e as KeyboardEvent).key === 'Enter')).toBe(false);
@@ -52,6 +52,18 @@ describe('PersonNoInput', () => {
     expect(onResolved).toHaveBeenLastCalledWith(null);
     await userEvent.type(input, '5');
     expect(screen.queryByText('개인번호를 확인하세요.')).not.toBeInTheDocument();
+  });
+
+  it('lookup 을 안 주면 공통 조회 API(/api/lookup/persons/{perNo}, 목)로 성명·사무소명을 찾는다', async () => {
+    const onResolved = vi.fn();
+    wrap(<PersonHost onParentKey={() => {}} onResolved={onResolved} />);
+    await userEvent.type(screen.getByPlaceholderText('개인번호'), '1234567{Enter}');
+    expect(await screen.findByText('홍길동')).toBeInTheDocument();
+    expect(screen.getByText('(테크부문)')).toBeInTheDocument();
+    expect(onResolved).toHaveBeenLastCalledWith({ perNo: '1234567', name: '홍길동', deptName: '테크부문' });
+    await userEvent.clear(screen.getByPlaceholderText('개인번호'));
+    await userEvent.type(screen.getByPlaceholderText('개인번호'), '9999999{Enter}');
+    expect(await screen.findByText('개인번호를 확인하세요.')).toBeInTheDocument();
   });
 });
 

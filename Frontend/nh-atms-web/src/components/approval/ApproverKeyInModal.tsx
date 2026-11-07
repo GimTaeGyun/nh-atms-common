@@ -18,19 +18,19 @@ interface Props {
   title?: ReactNode;
   /** 승인 대상 요약 */
   target?: ReactNode;
-  /** 요청자 사번 (기본: 현재 로그인 사용자) */
+  /** 요청자 개인번호 (기본: 나 — /api/me 의 perNo) */
   requesterId?: string;
 }
 
 interface Values {
-  empNo?: string;
+  perNo?: string;
   password?: string;
   reason?: string;
 }
 
-/** 책임자 KEY-IN 승인 모달: 승인자 사번+비밀번호, 요청자≠승인자(maker-checker) 검증 */
+/** 책임자 KEY-IN 승인 모달: 승인자 개인번호+비밀번호, 요청자(기본: 나의 개인번호)≠승인자(maker-checker) 검증 */
 export const ApproverKeyInModal = ({ open, onCancel, onApprove, onReject, title = '책임자 승인', target, requesterId }: Props) => {
-  const currentUserId = useAuthStore((s) => s.user?.userId);
+  const currentUserId = useAuthStore((s) => s.me?.perNo);
   const maker = (requesterId ?? currentUserId ?? '').trim();
   const [form] = Form.useForm<Values>();
   const [mode, setMode] = useState<'approve' | 'reject'>('approve');
@@ -53,7 +53,7 @@ export const ApproverKeyInModal = ({ open, onCancel, onApprove, onReject, title 
   };
 
   const finish = (v: Values) =>
-    mode === 'reject' && onReject ? run(() => onReject(String(v.reason).trim())) : run(() => onApprove({ empNo: String(v.empNo).trim(), password: String(v.password) }));
+    mode === 'reject' && onReject ? run(() => onReject(String(v.reason).trim())) : run(() => onApprove({ perNo: String(v.perNo).trim(), password: String(v.password) }));
 
   const cancel = () => {
     form.resetFields();
@@ -83,7 +83,7 @@ export const ApproverKeyInModal = ({ open, onCancel, onApprove, onReject, title 
         {mode === 'approve' ? (
           <>
             <Form.Item
-              name="empNo"
+              name="perNo"
               label="승인자 사번"
               rules={[
                 { required: true, whitespace: true, message: VMSG.required('승인자 사번') },

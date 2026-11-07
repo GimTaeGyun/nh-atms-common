@@ -24,7 +24,7 @@ interface Props {
 }
 
 /**
- * 전자결재 단계 버튼줄(2200 마감장표 전자결재, 2201 일마감 전자결재).
+ * 전자결재 단계 버튼줄(마감장표·일마감 전자결재 등).
  * 완료된 단계는 체크, 현재 단계만 활성 버튼. 단계 상태는 서버 응답으로 호출 쪽이 정한다.
  */
 export const ApprovalStepBar = ({ steps, inline = false, size = 'small' }: Props) => {

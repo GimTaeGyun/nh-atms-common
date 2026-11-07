@@ -52,7 +52,7 @@ export const splitRoadAddr = (roadAddr: string): Pick<AddressValue, 'sido' | 'si
 };
 
 /**
- * 도로명주소 입력 — [검색] · 시도 · 시군구 · 도로명/건물번호 + 우편번호 · 상세주소 (AS-IS 9300 코너 주소 공통화).
+ * 도로명주소 입력 — [검색] · 시도 · 시군구 · 도로명/건물번호 + 우편번호 · 상세주소 (코너 주소 입력 공통화).
  * 검색 팝업에서 1건을 고르면 시도/시군구/도로명/우편번호를 채우고 상세주소는 비운다.
  */
 export const AddressSearch = ({ value, onChange, search, sidoOptions = SIDO_LIST, sigunguOf, showDetail = true, disabled }: AddressSearchProps) => {

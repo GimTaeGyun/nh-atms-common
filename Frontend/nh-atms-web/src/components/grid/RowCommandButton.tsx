@@ -19,7 +19,7 @@ interface Props {
 }
 
 /**
- * 그리드 행마다 두는 원격명령 버튼(4001 접속재시도, 4101 PING 등).
+ * 그리드 행마다 두는 원격명령 버튼(접속재시도·PING 등).
  * 누르면 로딩 → 결과 태그(성공/실패)를 같은 셀에 표시한다. 폴링이 필요한 긴 명령은 useCommandPoll 을 run 안에서 쓴다.
  */
 export const RowCommandButton = ({ label, run, disabled, size = 'small', showResult = true }: Props) => {

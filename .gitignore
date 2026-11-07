@@ -8,3 +8,6 @@ test-results/
 playwright-report/
 coverage/
 .env*.local
+# ---- 프론트(Frontend/nh-atms-web): e2e:shots 캡쳐는 저장소에 넣지 않는다 ----
+Frontend/nh-atms-web/docs/screenshots/
+__pycache__/

@@ -8,7 +8,7 @@ export const PANEL_AUTO_COLLAPSE_BELOW = 1366;
 /** 열린 화면 탭 최대 개수 */
 export const MAX_OPEN_TABS = 12;
 
-/** 홈 화면키 (고정 탭). 화면번호는 screens/screenIds.ts 에서만 */
+/** 홈 화면키 (고정 탭) */
 export { HOME_SCREEN_KEY } from '@/screens/screenIds';
 
 /** 그리드 기본 페이지 크기 */

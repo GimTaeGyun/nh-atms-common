@@ -3,13 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTabStore } from '@/stores/useTabStore';
 import { useNavStore, findMenuByScreen } from '@/stores/useNavStore';
 import { useFavoriteStore } from '@/stores/useFavoriteStore';
-import { useAuthStore, selectIsAdmin } from '@/stores/useAuthStore';
 import { getScreen, parseScreenPath } from '@/screens/registry';
 import PlaceholderScreen from '@/screens/common/PlaceholderScreen';
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary';
 import { LoadingBlock } from '@/components/feedback/LoadingBlock';
 import { MAX_OPEN_TABS } from '@/config/constants';
 import { HOME_SCREEN_KEY, screenIdOf } from '@/screens/screenIds';
+import { useAuthStore, selectIsAdmin } from '@/stores/useAuthStore';
 import { notifyError } from '@/hooks/useAppMessage';
 import { L1_BY_NAME, navSlugOf } from '@/screens/l1';
 import { Result } from 'antd';
@@ -45,12 +45,12 @@ export const ScreenHost = () => {
       navigate('/home', { replace: true });
       return;
     }
-    if ((def?.adminOnly || menu?.adminYn === 'Y') && !isAdmin) {
+    if (def?.adminOnly && !isAdmin) {
       notifyError('관리자 전용 화면입니다.');
       navigate('/home', { replace: true });
       return;
     }
-    const title = def?.title ?? menu?.menuName ?? screenIdOf(screenKey);
+    const title = def?.title ?? menu?.menuNm ?? screenKey;
     const ok = open({ screenKey, title, path: location.pathname, closable: screenKey !== HOME_SCREEN_KEY });
     if (!ok) {
       notifyError(`열 수 있는 화면 탭은 최대 ${MAX_OPEN_TABS}개입니다.`);
@@ -70,10 +70,10 @@ export const ScreenHost = () => {
         const active = tab.key === activeKey;
         return (
           <Activity key={tab.key} mode={active ? 'visible' : 'hidden'}>
-            <div className="app-content-inner" data-screen={tab.screenKey} data-screen-id={tab.screenId}>
-              <ErrorBoundary scope={`${tab.screenId} ${tab.title}`}>
+            <div className="app-content-inner" data-screen={tab.screenKey}>
+              <ErrorBoundary scope={tab.title}>
                 <Suspense fallback={<LoadingBlock tip={`${tab.title} 화면을 불러오는 중…`} height={240} />}>
-                  <Comp screenKey={tab.screenKey} screenId={tab.screenId} active={active} />
+                  <Comp screenKey={tab.screenKey} screenId={screenIdOf(tab.screenKey)} active={active} />
                 </Suspense>
               </ErrorBoundary>
             </div>

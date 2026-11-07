@@ -1,196 +1,32 @@
 /**
- * 화면키 ↔ AS-IS 화면번호 매핑 — **화면번호는 이 파일(과 나중의 DB 메뉴)에서만 쓴다.**
- * 소스(파일명·라우트·화면 간 이동·팝업 제목·권한)는 전부 영문 화면키를 쓴다. 번호가 바뀌면 여기 한 줄만 고친다.
- * 키 규칙: `{대분류 slug}.{camelCase 이름}`, 팝업은 `popup.{이름}`. 아직 안 만든 화면도 메뉴·링크용으로 키를 둔다.
- * 2026-10-23 결정(사용자): 화면번호는 바뀔 수 있으므로 소스에 쓰지 않는다.
+ * 화면키 목록 — 소스(파일명·라우트·화면 간 이동·팝업 제목·권한)는 전부 이 영문 화면키를 쓴다.
+ * 키 규칙: `{대분류 slug}.{camelCase 이름}`, 팝업은 `popup.{이름}`. 라우트는 `/{slug}/{kebab 이름}`.
+ *
+ * 화면번호: 이 저장소의 견본은 AS-IS 번호가 없어 **번호를 쓰지 않는다**(설계 Q9). 그래서 값은 모두 '' 이고
+ * `screenIdOf()` 도 '' 를 돌려준다 → PageFrame·ModalTitle·화면 검색은 번호 자리를 그리지 않는다.
+ * 새 화면을 추가할 때도 번호 없이 키만 한 줄 넣는다(값 '').
  */
 export const SCREEN_IDS = {
   // ---- home ----
-  'home': '0000',
-  // ---- tx ----
-  'tx.specificTx': '1000',
-  'tx.depositWithdrawTx': '1001',
-  'tx.transferTx': '1002',
-  'tx.giroTx': '1003',
-  'tx.creditCardTx': '1004',
-  'tx.checkTx': '1005',
-  'tx.noMediaTx': '1006',
-  'tx.passbookTx': '1007',
-  'tx.fxTx': '1008',
-  'tx.destroyedTx': '1020',
-  'tx.accessLog': '1091',
-  'tx.overCashRefund': '1100',
-  'tx.refundRegList': '1200',
-  'tx.allTx': '1300',
-  'tx.destroyedTxApproval': '1301',
-  'tx.fxTxPanel': '1501',
-  'tx.errorCodeLookup': '7002',
-  /** 신규(AS-IS 없음, 2026-11-01) — 거래저널조회(mg-atms 거래내역조회 20컬럼 기준). 번호는 1300 계열 다음 잠정값 */
-  'tx.txJournal': '1302',
-  // ---- closing ----
-  'closing.openCloseReg': '2000',
-  'closing.closingSummary': '2101',
-  'closing.fxClosingStatus': '2102',
-  'closing.closingApproval': '2200',
-  'closing.dailyClosingApproval': '2201',
-  'closing.faultSlip': '2301',
-  'closing.fxClosingStatus2': '2501',
-  // ---- mgmt ----
-  'mgmt.cornerMgmt': '3000',
-  'mgmt.closeReservation': '3001',
-  'mgmt.alarmSetting': '3002',
-  'mgmt.vipCustomer': '3003',
-  'mgmt.highDenomSetting': '3004',
-  'mgmt.msTxLimit': '3005',
-  'mgmt.checkSetting': '3006',
-  'mgmt.faultStatus': '3100',
-  'mgmt.faultHistory': '3101',
-  'mgmt.callcenterFault': '3102',
-  'mgmt.faultNotifyStatus': '3103',
-  'mgmt.cashStatus': '3200',
-  'mgmt.fundOperation': '3201',
-  'mgmt.atmAsset': '3202',
-  'mgmt.cashVerify': '3203',
-  'mgmt.atmLocation': '3204',
-  'mgmt.globalAtmLocation': '3205',
-  'mgmt.regionContact': '3206',
-  'mgmt.stmMedia': '3207',
-  'mgmt.fxCashStatus': '3208',
-  'mgmt.fxCashVerify': '3209',
-  'mgmt.globalAtmStatus': '3210',
-  'mgmt.fxAtmCashStatus': '3500',
-  // ---- journal ----
-  'journal.journalList': '4000',
-  'journal.journalAgentStart': '4001',
-  'journal.journalImageAuth': '4002',
-  'journal.journalImageViewLog': '4003',
-  'journal.imageAuthDup': '4005',
-  'journal.imageViewLogDup': '4006',
-  'journal.destroyedJournal': '4020',
-  'journal.bizStart': '4100',
-  'journal.journalOpsEnv': '4101',
-  'journal.missingNoRequest': '4102',
-  'journal.opsLogRequest': '4103',
-  'journal.processTypeStat': '4104',
-  'journal.opsStatus': '4105',
-  'journal.dailyMonthlyCount': '4200',
-  'journal.missingNoCount': '4201',
-  'journal.opModeRate': '4202',
-  // ---- stat ----
-  'stat.txByHour': '5031',
-  'stat.txByAmount': '5032',
-  'stat.txVolumeStat': '5100',
-  'stat.promotion': '5102',
-  'stat.nationwideOps': '5130',
-  'stat.uptime': '5160',
-  'stat.uptimeLow': '5161',
-  'stat.holidayUptime': '5162',
-  'stat.outsrcAtmStat': '5500',
-  'stat.cashUsage': '5555',
-  'stat.c365Callcenter': '5556',
-  'stat.holidayTxTemp': '5959',
-  // ---- outsrc ----
-  'outsrc.atmStatus': '6000',
-  'outsrc.atmStatusHist': '6001',
-  'outsrc.dispatchStatus': '6002',
-  'outsrc.openTxStatus': '6003',
-  'outsrc.secondDispatch': '6004',
-  'outsrc.cashPosition': '6100',
-  'outsrc.serviceClosing': '6101',
-  'outsrc.cashUnprocessed': '6102',
-  'outsrc.closingRecon': '6103',
-  'outsrc.fundRecon': '6104',
-  'outsrc.replenishPlan': '6105',
-  'outsrc.replenishExtra': '6106',
-  'outsrc.vendorSlaGrade': '6200',
-  'outsrc.vendorSlaGradeHist': '6201',
-  'outsrc.cornerSlaScore': '6202',
-  'outsrc.uptimeHist': '6203',
-  'outsrc.faultHist': '6204',
-  'outsrc.cornerEnvEval': '6205',
-  'outsrc.csEval': '6206',
-  'outsrc.csHist': '6207',
-  'outsrc.evalItemMgmt': '6208',
-  'outsrc.pniGradeMgmt': '6209',
-  'outsrc.downtimeReason': '6210',
-  'outsrc.feeStdMgmt': '6211',
-  'outsrc.feeCalc': '6212',
-  'outsrc.downtimeHist': '6213',
-  'outsrc.outsrcStaff': '6300',
-  'outsrc.msgLog': '6301',
-  'outsrc.cornerMgmtOutsrc': '6302',
-  'outsrc.outsrcCompany': '6303',
-  'outsrc.itCostBilling': '6304',
-  // ---- board ----
-  'board.notice': '7000',
-  'board.bizContact': '7001',
-  // ---- system ----
-  'system.authGrant': '7100',
-  'system.authGrantLegacy': '7200',
-  'system.codeMgmt': '7201',
-  'system.aritamsCode': '7202',
-  'system.errorMessage': '7203',
-  'system.msgImport': '7204',
-  'system.remoteDispatch': '7205',
-  'system.atmVersionList': '7206',
-  'system.realtimeTx': '7207',
-  'system.vendorCode': '7208',
-  'system.routerService': '7209',
-  'system.tableMgmt': '7210',
-  'system.accountingMonitor': '7227',
-  /** 신규(AS-IS 없음, 2026-11-01 현업 요구) — 사용자 행위이력. 번호는 7210 다음 잠정값, T_MENU 확정 시 갱신 */
-  'system.userActionLog': '7211',
-  /** 신규(옛 프론트 관리 화면 이관, 2026-11-01) — 메뉴관리·사용자그룹관리. 번호 잠정 */
-  'system.menuMgmt': '7212',
-  'system.userGroupMgmt': '7213',
-  'system.userMgmt': '7214',
-  'system.uiStandard': '8000',
-  'system.outsrcStdLayout': '9998',
-  'system.screenLayoutSample': '9999',
-  // ---- popup ----
-  'popup.accessGate': '1099',
-  'popup.refundDetail': '6107',
-  'popup.loginNotice': '9001',
-  'popup.notOpenNotice': '9002',
-  'popup.txDetail': '9101',
-  'popup.depositDetail': '9102',
-  'popup.serviceTxDetail': '9103',
-  'popup.giroDetail': '9104',
-  'popup.aptFeeDetail': '9105',
-  'popup.cardAppPreview': '9122',
-  'popup.errorDetail': '9198',
-  'popup.txDetailDefault': '9199',
-  'popup.cornerEdit': '9300',
-  'popup.atmTempRegOffice': '9301',
-  'popup.atmInfo': '9302',
-  'popup.urgentApproval': '9303',
-  'popup.cornerLocationEditOffice': '9304',
-  'popup.faultNotifyDetail': '9311',
-  'popup.cashDetail': '9320',
-  'popup.fxCashDetail': '9321',
-  'popup.atmResourceDetail': '9322',
-  'popup.slipImage': '9400',
-  'popup.promotionDetail': '9512',
-  'popup.arrivalTimeEdit': '9601',
-  'popup.cornerOutsrcEdit': '9630',
-  'popup.atmTempReg': '9631',
-  'popup.atmInfoOutsrc': '9632',
-  'popup.urgentApprovalOutsrc': '9633',
-  'popup.cornerLocationEdit': '9634',
-  'popup.authGrantDetail': '9701',
-  'popup.authGrantApproval': '9702',
+  'home': '',
+  // ---- 견본(sample) ----
+  'sample.commonModules': '',
+  'sample.notice': '',
+  'sample.mcnInfo': '',
+  'sample.mcnModel': '',
+  // ---- 팝업 ----
+  'popup.officeSearch': '',
+  'popup.personSearch': '',
+  'popup.mcnSearch': '',
+  'popup.noticeEdit': '',
+  'popup.noticeView': '',
 } as const;
 
 export type ScreenKey = keyof typeof SCREEN_IDS;
 
 export const HOME_SCREEN_KEY: ScreenKey = 'home';
 
-/** 화면키 → 화면번호(표시용). 모르는 키면 키 그대로 */
-export const screenIdOf = (key: ScreenKey | string): string => (SCREEN_IDS as Record<string, string>)[key] ?? key;
-
-const BY_ID: Record<string, ScreenKey> = Object.fromEntries((Object.keys(SCREEN_IDS) as ScreenKey[]).map((k) => [SCREEN_IDS[k], k])) as Record<string, ScreenKey>;
-
-/** 화면번호 → 화면키 (백엔드 메뉴 응답·AS-IS 링크 변환용) */
-export const screenKeyOf = (screenId?: string | null): ScreenKey | undefined => (screenId ? BY_ID[String(screenId).trim()] : undefined);
+/** 화면키 → 표시용 화면번호. 이 저장소는 번호가 없어 항상 '' (호출하는 쪽은 빈 값이면 번호를 그리지 않는다) */
+export const screenIdOf = (key: ScreenKey | string): string => (SCREEN_IDS as Record<string, string>)[key] ?? '';
 
 export const isScreenKey = (v: unknown): v is ScreenKey => typeof v === 'string' && v in SCREEN_IDS;

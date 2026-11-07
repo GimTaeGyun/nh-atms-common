@@ -35,7 +35,7 @@ interface ServerErrorBody {
 export const KIND_MESSAGE: Record<AppErrorKind, string> = {
   network: '서버와 통신할 수 없습니다. 네트워크 상태를 확인하세요.',
   timeout: '응답 시간이 초과되었습니다. 잠시 후 다시 시도하세요.',
-  unauthorized: '인증이 만료되었습니다. 다시 로그인하세요.',
+  unauthorized: '사용자 정보를 확인할 수 없습니다. 시스템 관리자에게 문의하세요.',
   forbidden: '해당 기능에 대한 권한이 없습니다.',
   notFound: '요청한 자료를 찾을 수 없습니다.',
   validation: '입력값을 확인하세요.',

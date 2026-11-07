@@ -1,0 +1,75 @@
+# =====================================================================
+# atms-web 공통 설정 (모든 프로파일)
+#  - local : 개발 PC (bootRun·IntelliJ, 내장 톰캣) — application-local.yml + atms-common local-common.yml + D:\local-db.yml
+#  - jeus  : 은행 개발서버 JEUS (WAR, -Pjeus) — application-jeus.yml + atms-common jeus-common.yml (JNDI dsATMS01)
+#  우선순위: 프로파일 파일 > 이 파일. 비밀번호·실제 개인번호는 저장소에 두지 않는다.
+# =====================================================================
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: atms-web
+  profiles:
+    active: local
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      pool-name: AtmsHikariCP
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: kr.co.nh.atms.web
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    jdbc-type-for-null: VARCHAR
+
+logging:
+  level:
+    kr.co.nh.atms: DEBUG
+    org.springframework.security: INFO
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+atms:
+  # 로그인 없는 고정 사용자(설계 §5.3) — TB_INSA.PER_NO 1개.
+  # 저장소에는 CHANGE_ME. 실제 값은 저장소 밖에서: 로컬은 D:\local-db.yml 에
+  #   atms:
+  #     fixed-user:
+  #       per-no: "<개인번호>"
+  # 를 함께 적거나, 실행 옵션 -Datms.fixed-user.per-no=<개인번호>. 비었거나 CHANGE_ME 면 /api/** 가 401 ME_001.
+  fixed-user:
+    per-no: CHANGE_ME
+  lookup:
+    # 기기사 이름 원천(잠정 Q6): TB_CO_CODE 의 CODE_TYPE. 비우면 VEND_CODE 값만(이름 없음)
+    vendor-code-type: ""
+  api-message:
+    # T_API_MESSAGE 다시 읽는 주기(분). 0 이면 기동 때 1번만. 테이블이 없으면 시드(api-messages.tsv) 그대로
+    reload-minutes: 5
+
+# 사용자 행위 이력(T_USER_ACTION_LOG) — 모든 컨트롤러 호출을 자동 기록(UserActionLogAspect). 실패해도 요청은 정상 처리
+# exclude-uri-prefixes: 사용자 행위가 아닌 호출(나·메뉴·공통 조회·헬스체크)
+actionlog:
+  enabled: true
+  exclude-uri-prefixes: "/api/me,/api/menu/,/api/lookup/,/actuator"
+
+# CORS 허용 Origin — 로컬 기본값: Vite 개발서버(5173) + CRA(3000). JEUS 는 jeus-common.yml
+cors:
+  allowed-origins: "http://localhost:3000,http://localhost:5173"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

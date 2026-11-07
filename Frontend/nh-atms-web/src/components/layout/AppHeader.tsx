@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { UserOutlined } from '@ant-design/icons';
 import { env } from '@/config/env';
 import { useAuthStore, selectIsAdmin } from '@/stores/useAuthStore';
 import { useNavStore } from '@/stores/useNavStore';
@@ -6,15 +7,14 @@ import { useSettingsStore } from '@/stores/useSettingsStore';
 import { visibleL1Defs } from '@/screens/l1';
 import type { L1Slug } from '@/types/screen';
 import { GlobalSearch } from './GlobalSearch';
-import { SessionTimer } from './SessionTimer';
-import { AlarmBell } from './AlarmBell';
 import { BrandMark } from './BrandMark';
 import { MenuIcon } from './icons';
 
-/** 헤더(시안 2026-10-21): 로고 + 시스템명 + 1뎁스 메뉴(아이콘·구분선) + 화면 검색 + 장애 알림 + 세션 타이머 */
+/** 헤더: 로고 + 시스템명 + 1뎁스 메뉴(아이콘·구분선) + 화면 검색 + 나(이름·사무소). 로그인이 없어 세션 타이머·로그아웃 없음(설계 Q1) */
 export const AppHeader = () => {
   const navigate = useNavigate();
   const isAdmin = useAuthStore(selectIsAdmin);
+  const me = useAuthStore((s) => s.me);
   const activeL1 = useNavStore((s) => s.activeL1);
   const setActiveL1 = useNavStore((s) => s.setActiveL1);
   const panelCollapsed = useNavStore((s) => s.panelCollapsed);
@@ -50,8 +50,11 @@ export const AppHeader = () => {
       )}
       <div className="header-right">
         <GlobalSearch />
-        <AlarmBell />
-        <SessionTimer />
+        <span className="header-user" title={me ? `개인번호 ${me.perNo}${isAdmin ? ' · 관리자' : ''}` : undefined}>
+          <UserOutlined />
+          <b>{me?.name ?? '-'}</b>
+          {me?.kanm && <span className="muted">{me.kanm}</span>}
+        </span>
       </div>
     </header>
   );

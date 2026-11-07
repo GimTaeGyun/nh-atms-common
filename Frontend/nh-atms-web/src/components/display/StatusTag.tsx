@@ -1,30 +1,17 @@
 import type { ReactNode } from 'react';
 import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, MinusCircleFilled, StopFilled } from '@ant-design/icons';
-import type { AtmStatusCd } from '@/domain/types';
-import { ATM_STATUS_LABEL } from '@/domain/types';
 
 export type Tone = 'success' | 'danger' | 'warning' | 'info' | 'neutral';
 
-export const ATM_STATUS_TONE: Record<AtmStatusCd, Tone> = { '00': 'success', '01': 'warning', '02': 'danger', '03': 'danger', '09': 'neutral' };
 const ICON: Record<Tone, ReactNode> = { success: <CheckCircleFilled />, danger: <CloseCircleFilled />, warning: <ExclamationCircleFilled />, info: <ExclamationCircleFilled />, neutral: <MinusCircleFilled /> };
 
-/** 상태 알약 태그 (시안 B: 정상/장애/통신 단절/미개국) */
+/** 상태 알약 태그 (정상/오류/경고/정보/중립) */
 export const StatusTag = ({ tone, children, icon = true, text }: { tone: Tone; children: ReactNode; icon?: boolean; text?: boolean }) => (
   <span className={`status-tag ${tone}${text ? ' text' : ''}`}>
     {icon && ICON[tone]}
     {children}
   </span>
 );
-
-export const AtmStatusTag = ({ status, text }: { status?: AtmStatusCd | string; text?: boolean }) => {
-  const cd = (status ?? '00') as AtmStatusCd;
-  const tone = ATM_STATUS_TONE[cd] ?? 'neutral';
-  return (
-    <StatusTag tone={tone} text={text}>
-      {ATM_STATUS_LABEL[cd] ?? status}
-    </StatusTag>
-  );
-};
 
 /** 거래상태/결과 등 텍스트 기반 톤 매핑 */
 export const toneOf = (v?: string): Tone => {

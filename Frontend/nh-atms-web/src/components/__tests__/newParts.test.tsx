@@ -4,8 +4,6 @@ import { ListEditTabs } from '@/components/page/ListEditTabs';
 import { ApprovalStepBar } from '@/components/approval/ApprovalStepBar';
 import { RowCommandButton } from '@/components/grid/RowCommandButton';
 import { MasterDetailGrids } from '@/components/grid/MasterDetailGrids';
-import { summarizeTxStatus } from '@/screens/popup/TxStatusSummaryModal';
-import type { Transaction } from '@/domain/types';
 
 describe('ListEditTabs', () => {
   it('목록에서 선택하면 수정 탭, 등록이면 등록 탭, done 이면 목록으로', async () => {
@@ -69,16 +67,5 @@ describe('MasterDetailGrids', () => {
     fireEvent.click(screen.getByText('HY'));
     expect(screen.getByText('detail-HY')).toBeInTheDocument();
     expect(screen.getByText('모델 HY')).toBeInTheDocument();
-  });
-});
-
-describe('summarizeTxStatus', () => {
-  it('거래종류×상태로 건수·금액 합산', () => {
-    const t = (trTypeName: string, status: Transaction['status'], amount: number, fee = 0) => ({ trTypeName, status, amount, fee }) as Transaction;
-    const out = summarizeTxStatus([t('입금', '정상', 100), t('입금', '정상', 50, 1), t('출금', '불능', 10)]);
-    expect(out).toEqual([
-      { trTypeName: '입금', status: '정상', count: 2, amount: 150, fee: 1 },
-      { trTypeName: '출금', status: '불능', count: 1, amount: 10, fee: 0 },
-    ]);
   });
 });

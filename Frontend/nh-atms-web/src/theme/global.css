@@ -163,7 +163,7 @@ body {
 .data-grid td.cell-danger { color: var(--danger); font-weight: 600; }
 .data-grid td.cell-success { color: var(--success); font-weight: 600; }
 
-/* ===== 상세 폼 그리드(라벨/값 표 — 팝업 9101/9300 형태) ===== */
+/* ===== 상세 폼 그리드(라벨/값 표 — 상세·등록 팝업 형태) ===== */
 .detail-grid { display: grid; border: 1px solid var(--border-light); border-radius: var(--radius); overflow: hidden; background: #fff; }
 .detail-grid .dg-k { background: var(--bg-label-cell); padding: 7px 10px; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-light); border-right: 1px solid var(--border-light); display: flex; align-items: center; min-height: 36px; }
 .detail-grid .dg-k.req::after { content: '*'; color: var(--danger); margin-left: 3px; }
@@ -199,7 +199,7 @@ body {
 .status-tag.neutral { color: var(--text-secondary); background: var(--neutral-bg); }
 .status-tag.text { padding: 0; background: transparent; }
 
-/* ===== 격자 카드(3100) — 시안 2026-10-21 p.7: 1600 이상 5열, 선택 = 파랑 테두리, 통신단절 = 빨간 테두리 ===== */
+/* ===== 격자 카드 — 시안 2026-10-21 p.7: 1600 이상 5열, 선택 = 파랑 테두리, 통신단절 = 빨간 테두리 ===== */
 .atm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
 [data-band='L'] .atm-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .atm-card { position: relative; background: #fff; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 10px 12px 12px; box-shadow: var(--shadow-card); cursor: pointer; transition: box-shadow .15s, border-color .15s; }
@@ -289,5 +289,8 @@ body {
 .text-danger-strong { color: var(--danger); font-weight: 600; }
 /* DataGrid 밖(마스터·디테일 등)에서도 같은 빈 안내문 모양 */
 .grid-empty { padding: 28px 0; color: var(--text-muted); text-align: center; }
-/* 저널 원문·명세표 등 고정폭 본문(S4000·S9400) */
+/* 저널 원문·명세표 등 고정폭 본문 */
 .mono-block { font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); white-space: pre-wrap; font-size: 12px; line-height: 1.5; background: var(--bg-subtle); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 10px 12px; margin: 0; }
+
+/* 휴일 표시(TB_NMS_HDAY) — 날짜 선택 달력 칸. hooks/useHolidays holidayCellRender 가 입힌다 */
+.holiday-cell .ant-picker-cell-inner { color: var(--danger); font-weight: 600; }

@@ -6,10 +6,10 @@ import { validateRange, type Dayjs } from './date';
  * 입력 검증 규칙 모음 — antd Form 의 `rules` 에 그대로 넣는다(02-dev-guide §4.3).
  *
  *   const RULES = {
- *     termId: [req('기번'), digits(3)],
+ *     mcnNo: [req('기번'), digits(3)],
  *     endDate: [req('종료일'), afterField('startDate', VMSG.after('종료일', '시작일'))],
  *   } satisfies Record<string, Rule[]>;
- *   <Form.Item name="termId" rules={RULES.termId}>…
+ *   <Form.Item name="mcnNo" rules={RULES.mcnNo}>…
  *   const v = await form.validateFields();   // 저장 버튼은 이 한 줄
  *
  * 문구는 config/messages.ts 의 VMSG 에서 가져온다(조사 자동·마침표 통일, 02 §7). 화면 고유 문구도 VMSG 에 먼저 찾아 쓴다.

@@ -2,7 +2,7 @@ import { useMemo, type ReactNode } from 'react';
 import { ModeContext, makeModeValue, useOptionalMode, type ModeContextValue, type ModeDef } from './modeContext';
 
 interface Props<M extends string> {
-  /** 현재 모드 (예: 화면 ID '3000' | '6302') */
+  /** 현재 모드 (예: 'BRANCH' | 'VENDOR') */
   mode: M;
   modes: Record<M, ModeDef>;
   /** 모드별 렌더 (render-prop) 또는 일반 children */
@@ -10,7 +10,7 @@ interface Props<M extends string> {
 }
 
 /**
- * 동형 쌍 화면 모드 래퍼 — AS-IS 의 같은 화면을 두 화면 ID 로 쓰던 것(3000↔6302 등)을 1개 컴포넌트 + 모드로 분기.
+ * 동형 쌍 화면 모드 래퍼 — AS-IS 의 같은 화면을 두 화면으로 쓰던 것(영업점용↔업체용 등)을 1개 컴포넌트 + 모드로 분기.
  * 하위에서는 useMode().isVisible('필드키') 또는 <ModeOnly hide="필드키"> 로 모드별 숨김을 처리한다.
  */
 export const ModeFrame = <M extends string>({ mode, modes, children }: Props<M>) => {

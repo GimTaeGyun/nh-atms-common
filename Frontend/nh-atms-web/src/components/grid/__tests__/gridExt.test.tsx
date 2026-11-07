@@ -4,8 +4,6 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { ConfigProvider } from 'antd';
 import { EditableGrid, type EditableColumn, type EditableGridHandle } from '@/components/grid/EditableGrid';
 import { MatrixGrid } from '@/components/grid/MatrixGrid';
-import { ReconcileGrid, pairMismatch } from '@/components/grid/ReconcileGrid';
-import { STATUS_BIT_GROUPS, StatusBitsPanel, UNCLASSIFIED_GROUP_TITLE, resolveStatusBits } from '@/components/grid/StatusBitsPanel';
 
 interface Code { id: string; name: string; useYn: string }
 const codeCols: EditableColumn<Code>[] = [
@@ -105,60 +103,5 @@ describe('MatrixGrid', () => {
     expect(screen.getByText('2,000').closest('td')).toHaveClass('mx-danger');
     expect(screen.getAllByText('수도권')).toHaveLength(1); // 그룹 병합
     expect(container.querySelector('.mx-total-row')).not.toBeNull();
-  });
-});
-
-interface Recon { termId: string; nhCash?: number; coCash?: number; nhCnt: number; coCnt: number }
-describe('ReconcileGrid', () => {
-  const rows: Recon[] = [
-    { termId: 'T001', nhCash: 1000, coCash: 1000, nhCnt: 1, coCnt: 1 },
-    { termId: 'T002', nhCash: 2000, coCash: 1500, nhCnt: 2, coCnt: 2 },
-    { termId: 'T003', nhCash: 300, coCash: undefined, nhCnt: 3, coCnt: 3 },
-  ];
-  const pairs = [
-    { key: 'cash', title: '현금', ours: (r: Recon) => r.nhCash, theirs: (r: Recon) => r.coCash },
-    { key: 'cnt', title: '건수', ours: (r: Recon) => r.nhCnt, theirs: (r: Recon) => r.coCnt },
-  ];
-
-  it('pairMismatch', () => {
-    expect(pairMismatch(1, 1)).toBe(false);
-    expect(pairMismatch(undefined, undefined)).toBe(false);
-    expect(pairMismatch(1, undefined)).toBe(true);
-    expect(pairMismatch(100, 101, 1)).toBe(false);
-  });
-
-  it('불일치 건수 + 불일치만 보기 + 합계', async () => {
-    render(<ConfigProvider><ReconcileGrid<Recon> rows={rows} rowKey="termId" keyColumns={[{ title: '기번', dataIndex: 'termId', width: 80 }]} pairs={pairs} /></ConfigProvider>);
-    expect(screen.getByText(/불일치/, { selector: '.ge-summary' }).textContent).toMatch(/불일치\s*2\s*건 \/ 전체 3건/);
-    expect(rowOf('T002')).toHaveClass('row-mismatch');
-    expect(rowOf('T001')).not.toHaveClass('row-mismatch');
-    expect(screen.getByText('500').closest('td')).toHaveClass('diff-pos');
-    expect(screen.getByText('3,300')).toBeInTheDocument(); // 농협 현금 합계
-    expect(screen.getByText('2,500')).toBeInTheDocument(); // 업체 현금 합계
-
-    fireEvent.click(screen.getByRole('switch', { name: '불일치만 보기' }));
-    await waitFor(() => expect(screen.queryByText('T001')).toBeNull());
-    expect(screen.getByText('T002')).toBeInTheDocument();
-    expect(screen.getByText('T003')).toBeInTheDocument();
-  });
-});
-
-describe('StatusBitsPanel', () => {
-  it('기본 7그룹 + 켜진 비트 강조 + 미분류', () => {
-    render(<ConfigProvider><StatusBitsPanel bits={{ '제한거래.입금': true, '매체걸림.카드': false, 통신단절: true, 걸림: true }} /></ConfigProvider>);
-    for (const g of STATUS_BIT_GROUPS) expect(screen.getByRole('region', { name: g.title })).toBeInTheDocument();
-    const limit = screen.getByRole('region', { name: '제한거래' });
-    expect(limit).toHaveClass('on');
-    expect(within(limit).getByText('입금')).toHaveClass('bit-on-label');
-    expect(within(limit).getByText('지급')).not.toHaveClass('bit-on-label');
-    expect(screen.getByRole('region', { name: '매체걸림' })).toHaveClass('on'); // 별칭 '걸림'
-    expect(screen.getByRole('region', { name: '모듈장애' })).not.toHaveClass('on');
-    const etc = screen.getByRole('region', { name: UNCLASSIFIED_GROUP_TITLE });
-    expect(within(etc).getByText('통신단절')).toHaveClass('bit-on-label');
-    expect(screen.getAllByRole('checkbox').every((c) => (c as HTMLInputElement).disabled)).toBe(true);
-  });
-
-  it('미분류 없으면 그룹 7개', () => {
-    expect(resolveStatusBits({ '기타.SW장애': true })).toHaveLength(7);
   });
 });

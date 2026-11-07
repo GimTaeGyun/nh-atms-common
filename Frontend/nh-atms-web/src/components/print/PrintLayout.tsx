@@ -29,7 +29,7 @@ interface Props {
  * PageFrame 의 직계 자식으로 두면 인쇄 시 같은 화면의 나머지 영역은 빠지고 이 양식만 A4 가로로 출력된다.
  */
 export const PrintLayout = ({ title, conditions, condCols = 4, children, printedBy, printedAt, className }: Props) => {
-  const user = useAuthStore((s) => s.user);
+  const me = useAuthStore((s) => s.me);
   const [stamp, setStamp] = useState(nowDisplay);
   // Ctrl+P 로 인쇄해도 출력일시가 그 시점이 되게
   useEffect(() => {
@@ -38,7 +38,7 @@ export const PrintLayout = ({ title, conditions, condCols = 4, children, printed
     return () => window.removeEventListener('beforeprint', onBefore);
   }, []);
 
-  const by = printedBy ?? (user ? `${user.userName}${user.deptName ? ` (${user.deptName})` : ''}` : '-');
+  const by = printedBy ?? (me ? `${me.name}${me.kanm ? ` (${me.kanm})` : ''}` : '-');
   const at = printedAt ?? stamp;
   const rows: PrintCondition[][] = [];
   (conditions ?? []).forEach((c, i) => {
