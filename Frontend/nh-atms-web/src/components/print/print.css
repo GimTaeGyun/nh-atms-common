@@ -1,0 +1,52 @@
+/* ===== 인쇄 공통 (PrintLayout 이 불러온다) =====
+ * 화면에서는 .print-only 를 숨기고, 인쇄 시 앱 셸(헤더·레일·패널·탭바)을 숨기고 본문만 A4 가로로 출력한다.
+ * PrintLayout 을 PageFrame 의 직계 자식으로 두면 같은 화면의 나머지(조회조건·그리드 등)는 인쇄에서 빠진다.
+ */
+.print-only { display: none; }
+
+.print-layout { color: #000; font-size: 11px; }
+.print-layout .pl-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 6px; }
+.print-layout .pl-title { margin: 0; font-size: 16px; font-weight: 700; }
+.print-layout .pl-meta { font-size: 10px; white-space: nowrap; }
+.print-layout .pl-cond { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+.print-layout .pl-cond th, .print-layout .pl-cond td { border: 1px solid #555; padding: 2px 6px; text-align: left; font-size: 10px; }
+.print-layout .pl-cond th { background: #eee; font-weight: 600; white-space: nowrap; width: 1%; }
+.print-layout .pl-foot { display: flex; justify-content: space-between; border-top: 1px solid #000; margin-top: 8px; padding-top: 3px; font-size: 10px; }
+
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  html, body, #root { height: auto !important; overflow: visible !important; background: #fff !important; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* 앱 셸 크롬 숨김 */
+  .app-header, .app-side, .app-rail, .app-panel, .app-tabbar, .message-line, .no-print { display: none !important; }
+  .app-shell, .app-main { display: block !important; height: auto !important; overflow: visible !important; background: #fff !important; }
+  .app-content { overflow: visible !important; padding: 0 !important; }
+  .app-content-inner { min-width: 0 !important; }
+  .page-crumb, .page-actions, .page-title .fav-btn, .ant-pagination, .search-advanced-bar { display: none !important; }
+
+  .print-only { display: block !important; }
+
+  /* PrintLayout 이 있는 화면은 인쇄 양식만 출력 */
+  .page-frame:has(> .print-layout) > :not(.print-layout) { display: none !important; }
+
+  /* 표: 테두리, 머리글 반복, 행 쪼개짐 방지 */
+  table { border-collapse: collapse !important; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, img { page-break-inside: avoid; break-inside: avoid; }
+  .print-layout table:not(.pl-cond) { width: 100%; }
+  .print-layout table:not(.pl-cond) th, .print-layout table:not(.pl-cond) td { border: 1px solid #555; padding: 2px 4px; font-size: 10px; }
+  .print-layout table:not(.pl-cond) th { background: #eee; }
+  .ant-table-wrapper .ant-table-thead > tr > th, .ant-table-wrapper .ant-table-tbody > tr > td, .ant-table-wrapper .ant-table-summary > tr > td { border: 1px solid #777 !important; padding: 2px 4px !important; font-size: 10px; }
+
+  /* 고정 열(sticky)·그림자·스크롤 해제 — scroll.y 표는 머리글이 별도 표라 반복되지 않는다 */
+  .ant-table-cell-fix { position: static !important; }
+  .ant-table-cell-fix::after, .ant-table-container::before, .ant-table-container::after { display: none !important; box-shadow: none !important; }
+  .ant-table-body, .ant-table-content { overflow: visible !important; max-height: none !important; }
+  .ant-table-header { position: static !important; overflow: visible !important; }
+  .ant-table-tbody > tr > td { white-space: normal !important; }
+
+  /* 카드 장식 제거 */
+  .panel, .kpi-card, .detail-grid { box-shadow: none !important; }
+}

@@ -1,0 +1,131 @@
+/* ===== 앱 셸: 헤더(전폭) / 아이콘 레일 + 사이드 패널 / 오픈탭바 + 콘텐츠 ===== */
+.app-shell { display: grid; grid-template-rows: var(--header-h) 1fr; grid-template-columns: auto 1fr; height: 100vh; overflow: hidden; background: var(--bg-page); }
+.app-header { grid-column: 1 / -1; }
+.app-side { display: flex; height: calc(100vh - var(--header-h)); position: relative; z-index: 20; }
+.app-main { display: flex; flex-direction: column; min-width: 0; height: calc(100vh - var(--header-h)); }
+.app-content { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px 24px; }
+.app-content-inner { min-width: var(--content-min); }
+
+/* ===== 헤더 (시안 B: 흰 배경, 로고 + 시스템명 + 1뎁스 네비 + 검색) ===== */
+.app-header { display: flex; align-items: center; gap: 20px; padding: 0 18px 0 16px; background: #fff; border-bottom: 1px solid var(--border); height: var(--header-h); }
+.app-header .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: none; }
+.app-header .brand img { height: 26px; }
+.app-header .brand .sys-name { font-size: 13px; font-weight: 700; color: var(--primary); letter-spacing: -0.2px; white-space: nowrap; }
+.app-header .env-badge { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--warning-bg); color: #b26a00; letter-spacing: .3px; }
+.app-header .env-badge.prod { display: none; }
+.top-nav { display: flex; align-items: stretch; height: 100%; margin-left: 10px; flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.top-nav::-webkit-scrollbar { display: none; }
+/* 1뎁스 메뉴(시안 2026-10-21): 아이콘 + 글자, 항목 사이 얇은 구분선, 선택 = 연파랑 배경 + 밑줄 */
+.top-nav button { all: unset; cursor: pointer; padding: 0 14px; font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px; white-space: nowrap; position: relative; transition: color .15s, background .15s; }
+.top-nav button .anticon { font-size: 15px; color: var(--text-secondary); }
+.top-nav button + button::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 1px; height: 14px; background: var(--border); }
+.top-nav button:hover { color: var(--primary); }
+.top-nav button:hover .anticon { color: var(--primary); }
+.top-nav button.on { color: var(--primary); background: #e9f1fb; }
+.top-nav button.on .anticon { color: var(--primary); }
+.top-nav button.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--primary); }
+.header-right { display: flex; align-items: center; gap: 10px; flex: none; margin-left: auto; }
+.global-search .ant-select-selector { border-radius: 8px !important; }
+.header-icon-btn { all: unset; cursor: pointer; position: relative; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: var(--text-secondary); transition: background .12s, color .12s; }
+.header-icon-btn:hover { background: var(--bg-subtle); color: var(--primary); }
+.header-badge { position: absolute; top: 1px; right: -1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.session-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); padding: 3px 10px; border: 1px solid var(--border-light); border-radius: 14px; background: var(--bg-subtle); white-space: nowrap; }
+.session-chip b { font-variant-numeric: tabular-nums; color: var(--text); }
+.session-chip.warn b { color: var(--danger); }
+.session-chip .ant-btn { height: 20px; padding: 0 6px; font-size: 11px; }
+
+/* ===== 아이콘 줄 (시안 A: NH 블루) — 사이드바를 접었을 때만 표시 ===== */
+.app-rail { width: var(--rail-w); background: var(--nh-blue); display: flex; flex-direction: column; align-items: stretch; flex: none; }
+.rail-expand { all: unset; cursor: pointer; display: flex; align-items: center; justify-content: center; height: 34px; color: rgba(255,255,255,.8); font-size: 13px; border-bottom: 1px solid rgba(255,255,255,.14); }
+.rail-expand:hover { background: var(--nh-blue-hover); color: #fff; }
+.rail-items { display: flex; flex-direction: column; padding: 6px 0; gap: 2px; }
+.rail-btn { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 54px; color: rgba(255,255,255,.78); font-size: 10.5px; letter-spacing: -0.2px; transition: background .12s, color .12s; position: relative; }
+.rail-btn .anticon { font-size: 19px; }
+.rail-btn:hover { background: var(--nh-blue-hover); color: #fff; }
+.rail-btn.on { background: var(--nh-blue-active); color: #fff; }
+.rail-btn.on::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--nh-gold); }
+.rail-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 10px; border-top: 1px solid rgba(255,255,255,.14); }
+.rail-icon-btn { all: unset; cursor: pointer; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.85); font-size: 18px; transition: background .12s; }
+.rail-icon-btn:hover { background: var(--nh-blue-hover); color: #fff; }
+.rail-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--nh-gold); color: #16305c; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-top: 4px; }
+.rail-badge { position: absolute; top: 6px; right: 8px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+/* ===== 사이드 패널 (시안 2026-10-21: 흰 배경, 즐겨찾기 상자 + 2/3뎁스 트리, 이름만) ===== */
+.app-panel { width: var(--panel-w); background: #fff; border-right: 1px solid var(--border); display: flex; flex-direction: column; flex: none; transition: width .15s; }
+.app-panel.flyout { position: absolute; left: var(--rail-w); top: 0; bottom: 0; box-shadow: 8px 0 24px rgba(5,70,129,.14); z-index: 30; }
+.panel-head { display: flex; align-items: center; gap: 8px; padding: 10px 10px 8px 14px; font-weight: 700; font-size: 14px; }
+.panel-head .anticon { color: var(--primary); font-size: 15px; }
+.panel-head-actions { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+.panel-body { flex: 1; min-height: 0; overflow: auto; padding: 8px 8px 12px; }
+.panel-section { margin-bottom: 6px; }
+.panel-folder { all: unset; cursor: pointer; display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 8px 6px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.panel-folder:hover { color: var(--text); }
+.panel-folder .anticon { font-size: 11px; transition: transform .15s; }
+.panel-folder.open .anticon { transform: rotate(180deg); }
+.panel-leaf { all: unset; cursor: pointer; display: flex; align-items: center; gap: 6px; width: 100%; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--text); line-height: 1.3; position: relative; }
+.panel-leaf:hover { background: #eef4fb; }
+.panel-leaf.on { background: var(--primary); color: #fff; font-weight: 600; }
+.panel-leaf .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.panel-leaf .sid { font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.panel-leaf.on .sid { color: rgba(255,255,255,.7); }
+.panel-leaf .adm { font-size: 9px; font-weight: 700; padding: 0 4px; border-radius: 3px; background: var(--info-bg); color: var(--info); }
+.panel-leaf.on .adm { background: rgba(255,255,255,.2); color: #fff; }
+.panel-leaf .star { opacity: 0; font-size: 12px; color: var(--text-muted); }
+.panel-leaf:hover .star, .panel-leaf .star.fav { opacity: 1; }
+.panel-leaf .star.fav { color: var(--nh-gold); }
+.panel-leaf.on .star { color: #fff; }
+.panel-divider { height: 1px; background: var(--border-light); margin: 8px 6px; }
+.panel-empty { padding: 8px 10px; font-size: 12px; color: var(--text-muted); }
+/* 사이드바 맨 위 "☆ 즐겨찾기 ▾" 상자(시안 p.10, 모든 화면) */
+.panel-fav-box { padding: 10px 10px 2px; }
+.panel-fav-head { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 6px; width: 100%; height: 32px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 13px; font-weight: 600; color: var(--text); background: #fff; }
+.panel-fav-head:hover { border-color: var(--primary); }
+.panel-fav-head .anticon-down { margin-left: auto; font-size: 11px; color: var(--text-muted); }
+.panel-foot { border-top: 1px solid var(--border-light); padding: 8px 8px 10px; }
+.quick-link { all: unset; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--text-secondary); }
+.quick-link:hover { background: #f3f7fc; color: var(--text); }
+.quick-link .anticon { font-size: 13px; color: var(--text-muted); }
+.user-card { display: flex; align-items: center; gap: 10px; padding: 10px 8px 6px; margin-top: 6px; border-top: 1px solid var(--border-light); }
+.user-card .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--nh-gold); color: #16305c; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
+.user-card .nm { font-weight: 700; font-size: 13px; }
+.user-card .dept { font-size: 11px; color: var(--text-muted); }
+.panel-settings { all: unset; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 6px 8px; font-size: 12px; color: var(--text-secondary); border-radius: 6px; width: 100%; }
+.panel-settings:hover { background: #f3f7fc; color: var(--text); }
+.panel-foot-actions { display: flex; gap: 4px; }
+.panel-foot-actions .panel-settings { width: auto; flex: 1; }
+
+/* ===== 오픈 탭바 (시안 2026-10-21: 헤더 아래, 네모 탭·같은 폭·얇은 테두리, 선택 = 흰 배경 + 파랑 굵은 글자) ===== */
+.app-tabbar { display: flex; align-items: stretch; height: var(--tabbar-h); background: #eef2f7; border-bottom: 1px solid var(--border); padding: 0 8px 0 0; flex: none; }
+.app-tabbar .tabs { display: flex; align-items: stretch; flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; height: 100%; }
+.app-tabbar .tabs::-webkit-scrollbar { display: none; }
+.open-tab { display: flex; align-items: center; gap: 6px; width: 180px; padding: 0 8px 0 12px; border-right: 1px solid var(--border); font-size: 12.5px; color: var(--text-secondary); cursor: pointer; white-space: nowrap; flex: none; position: relative; user-select: none; transition: background .12s; }
+.open-tab:hover { background: #f6f8fb; color: var(--text); }
+.open-tab.on { background: #fff; color: var(--primary); font-weight: 700; }
+.open-tab.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: #fff; }
+.open-tab.home { width: auto; padding-right: 12px; }
+.open-tab .ttl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.open-tab .cls { font-size: 10px; color: var(--text-muted); padding: 3px; border-radius: 4px; }
+.open-tab .cls:hover { background: rgba(0,0,0,.08); color: var(--danger); }
+.open-tab.home .anticon-home { color: var(--primary); }
+.tabbar-actions { display: flex; align-items: center; gap: 4px; padding-left: 6px; }
+
+/* ===== 좁은 화면: 헤더(로고 + 1뎁스 메뉴 + 검색 + 알림 + 타이머)가 한 줄에 다 들어가도록 단계별로 줄인다 =====
+   1760 이상: 전부 표시 / 1440~1759: 검색 범위·타이머 라벨 숨김, 메뉴 간격 축소 / 1280~1439: 시스템명 숨김 / 1280 미만: 더 축소
+   (1440~1679 에서 메뉴 끝 항목이 잘리던 문제 수정 — 측정 스크립트 기준 각 구간 여유 50px 이상) */
+@media (max-width: 1759px) {
+  .app-header { gap: 14px; }
+  .top-nav button { padding: 0 11px; }
+  .global-search .search-scope { display: none; }
+  .global-search .ant-select-auto-complete { width: 190px !important; }
+  .session-chip .chip-label { display: none; }
+}
+@media (max-width: 1439px) {
+  .app-header { gap: 12px; }
+  .app-header .sys-name { display: none; }
+  .top-nav { margin-left: 0; }
+  .top-nav button { padding: 0 8px; font-size: 13px; }
+}
+@media (max-width: 1279px) {
+  .top-nav button { padding: 0 7px; font-size: 12.5px; }
+  .global-search .ant-select-auto-complete { width: 150px !important; }
+}

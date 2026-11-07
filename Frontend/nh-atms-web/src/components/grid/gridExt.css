@@ -1,0 +1,44 @@
+/* ===== 그리드 확장 공통 (EditableGrid / MatrixGrid / ReconcileGrid / StatusBitsPanel) ===== */
+.grid-ext-toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin-bottom: 6px; min-height: 28px;
+}
+.grid-ext-toolbar .ge-summary { color: var(--text-secondary); }
+.grid-ext-toolbar .ge-summary b { color: var(--text); margin: 0 2px; }
+.grid-ext-toolbar .ge-summary b.ge-danger { color: var(--danger); }
+
+/* ----- 인라인 편집 ----- */
+.editable-grid .ant-form-item { margin: 0; }
+.editable-grid .ant-form-item-explain { font-size: 11px; white-space: normal; }
+.editable-grid .ant-table-tbody > tr > td.cell-dirty { background: var(--warning-bg); box-shadow: inset 3px 0 0 var(--warning); }
+.editable-grid .ant-table-tbody > tr.row-added > td { background: var(--info-bg); }
+.editable-grid .ant-table-tbody > tr.row-deleted > td { background: var(--neutral-bg); color: var(--text-muted); text-decoration: line-through; }
+
+/* ----- 대사 ----- */
+.reconcile-grid .ant-table-tbody > tr.row-mismatch > td { background: var(--danger-bg); }
+.reconcile-grid .ant-table-tbody > tr > td.cell-mismatch { color: var(--danger); }
+.reconcile-grid td.diff-cell { background: var(--bg-subtle); }
+.reconcile-grid td.diff-cell.diff-pos,
+.reconcile-grid td.diff-cell.diff-neg { color: var(--danger); font-weight: 700; }
+.reconcile-grid .ant-table-tbody > tr.row-mismatch > td.diff-cell { background: #fbd9d6; }
+
+/* ----- 매트릭스 ----- */
+.matrix-grid td.mx-head { background: var(--bg-label-cell); font-weight: 600; }
+.matrix-grid td.mx-total,
+.matrix-grid .mx-total-row > td { background: var(--bg-subtle); font-weight: 700; }
+.matrix-grid .ant-table-tbody > tr > td.mx-danger { background: var(--danger-bg); color: var(--danger); font-weight: 700; }
+.matrix-grid .ant-table-tbody > tr > td.mx-warning { background: var(--warning-bg); color: #b26a00; font-weight: 700; }
+
+/* ----- 상태 비트 패널 ----- */
+.status-bits { display: grid; gap: 10px; }
+.status-bits .sb-group { border: 1px solid var(--border-light); border-radius: var(--radius); background: var(--bg-panel); overflow: hidden; }
+.status-bits .sb-group.on { border-color: #f5c2c0; }
+.status-bits .sb-title {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 10px; background: var(--bg-label-cell); font-weight: 600; color: var(--text-secondary);
+}
+.status-bits .sb-group.on .sb-title { background: var(--danger-bg); color: var(--danger); }
+.status-bits .sb-count { min-width: 20px; padding: 0 6px; border-radius: 10px; background: var(--danger); color: #fff; font-size: 11px; text-align: center; }
+.status-bits .sb-items { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; padding: 8px 10px; }
+.status-bits .sb-items .ant-checkbox-wrapper { font-size: 13px; margin: 0; }
+.status-bits .bit-on-label { color: var(--danger); font-weight: 600; }

@@ -1,0 +1,21 @@
+// atms-web : 화면 백엔드 (Web/REST) — web/common·나(/api/me)·메뉴·공통조회·행위이력·견본 화면
+// 근거: nh-atms atms-web/build.gradle (업무 전용 gson·prometheus·프론트 dist 동봉은 뺐다)
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+dependencies {
+    implementation project(':atms-common')
+
+    // SQL 파라미터 포함 로깅 — 로컬 개발(bootRun) 전용.
+    // developmentOnly: bootJar/bootWar(배포 산출물)에서 제외 — 운영 SQL 평문 로깅 방지
+    developmentOnly 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.2'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // 헬스체크
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}

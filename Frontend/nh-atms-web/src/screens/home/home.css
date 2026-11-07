@@ -1,0 +1,46 @@
+/* ===== 대시보드(0000) — 시안 2026-10-21 p.2 + 현업 의견(2026-11-03) ===== */
+.home-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+.home-span-12 { grid-column: span 12; }
+.home-span-7 { grid-column: span 7; }
+.home-span-5 { grid-column: span 5; }
+.home-left { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+[data-band='S'] .home-span-7, [data-band='S'] .home-span-5 { grid-column: span 12; }
+
+/* 머리띠: 시스템명 작게 + 사무소 이름 크게 + 등급 꼬리표 + 사무소 코드 (마스코트 그림은 반입 규칙상 제외, 연한 원 장식만) */
+.home-hero { position: relative; overflow: hidden; padding: 22px 26px 20px; border-radius: var(--radius-lg); background: linear-gradient(90deg, #eaf3fd 0%, #f4f8fd 70%, #f4f8fd 100%); min-height: 118px; }
+.home-hero::before { content: ''; position: absolute; right: 40px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(5,70,129,.10) 0%, rgba(5,70,129,0) 70%); }
+.home-hero::after { content: ''; position: absolute; right: 180px; bottom: -90px; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(255,184,28,.18) 0%, rgba(255,184,28,0) 70%); }
+.home-hero .sys { font-size: 12px; font-weight: 600; color: var(--primary); letter-spacing: -0.2px; }
+.home-hero .nm { display: flex; align-items: baseline; gap: 10px; margin-top: 4px; }
+.home-hero .nm b { font-size: 30px; font-weight: 800; color: var(--primary); letter-spacing: -0.8px; line-height: 1.15; }
+.home-hero .nm .grade { font-size: 12px; font-weight: 600; color: var(--primary); background: #fff; border: 1px solid #cfe0f5; border-radius: 10px; padding: 1px 9px; }
+.home-hero .cd { margin-top: 8px; font-size: 12px; color: var(--text-secondary); }
+.home-hero .cd b { color: var(--text); font-variant-numeric: tabular-nums; margin-left: 4px; }
+
+/* 관리 현황: 총 대수 + 일평균 거래량 카드 / 상태 4칸(2×2) */
+.home-kpi-row { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; }
+.home-kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.home-scope { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
+.home-total { flex-direction: row !important; align-items: center; justify-content: space-between; gap: 16px; }
+.home-total .ht-left { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.home-total .ht-left .lbl { font-size: 14px; font-weight: 600; }
+.home-total .ht-left .kpi-value { text-align: left; font-size: 34px; }
+.home-avgtx { min-width: 150px; font-size: 13px; padding-left: 16px; border-left: 1px solid var(--border-light); flex: none; }
+.home-avgtx .t { color: var(--text-secondary); font-weight: 500; }
+.home-avgtx .v { font-size: 24px; font-weight: 700; color: var(--accent); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.home-avgtx .v small { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-left: 3px; }
+.home-avgtx .d { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* 공지 카드는 왼쪽 칸 높이에 맞춘다 */
+.home-notice { height: 100%; display: flex; flex-direction: column; }
+.home-notice .panel-body { flex: 1; }
+
+/* 게시판 카드 탭 (결정 2: 게시판은 상단 메뉴 대신 대시보드에서 진입) */
+.board-tabs { display: inline-flex; align-items: baseline; gap: 14px; }
+.board-tabs button { all: unset; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-muted); padding-bottom: 2px; border-bottom: 2px solid transparent; }
+.board-tabs button:hover { color: var(--text); }
+.board-tabs button.on { color: var(--text); font-weight: 700; border-bottom-color: var(--primary); }
+.board-tabs button:focus-visible { outline: 2px solid var(--accent, #1d5fcf); outline-offset: 2px; border-radius: 2px; }
+
+/* 기기 표 탭(기기상태정보 / 운영시간(코너)정보 / 일괄용역기기정보) */
+.home-tabs .ant-tabs-nav { margin-bottom: 8px; }

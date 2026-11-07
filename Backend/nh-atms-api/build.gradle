@@ -1,0 +1,103 @@
+// =====================================================================
+// nh-atms-common 백엔드 루트 build.gradle
+// - atms-common : 공통 라이브러리(jar) — 응답·예외·메시지·보안·페이징·감사 컬럼
+// - atms-web    : 화면 백엔드(Spring Boot 실행 모듈) — web/common·나·메뉴·공통조회·견본 화면
+//
+// 근거
+// - 기본 골격: nh-atms Backend/nh-atms-api/build.gradle (Boot 3.5.0, dependency-management 1.1.7, Java 21, lombok)
+// - 배포 기능: nh-atms-server(배포킷) NH-ATMS/Backend/nh-atms-api/build.gradle 을 복사
+//     · @Tag("db") 테스트 기본 제외(-PdbTest 로만 실행) — 은행 DB 계정 잠김 방지
+//     · -Pjeus 일 때만 WAR + providedRuntime 톰캣 + WEB-INF/web.xml(jeus/web.xml), application-local.yml 제외
+//   배포킷 Jenkins(backend.Jenkinsfile)의 `./gradlew bootWar -Pjeus --offline` 을 그대로 쓸 수 있게 맞춘 것이다.
+// - 새 라이브러리를 추가하지 않는다(폐쇄망 gradle 캐시에 있는 것만).
+// =====================================================================
+
+plugins {
+    id 'org.springframework.boot' version '3.5.0' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+}
+
+allprojects {
+    group = 'kr.co.nh'
+    version = '0.0.1-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+            // vendor 고정 없음 (nh-atms 2026-07-28 점검 H-1): 폐쇄망 PC·Jenkins 의 로컬 JDK 21 을 그대로 쓴다.
+            // 자동 탐지가 안 되면 -Porg.gradle.java.installations.paths=<jdk-21 폴더>
+        }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        }
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencies {
+        // Lombok (모든 모듈 공통)
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        // Test
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    tasks.named('test') {
+        // 실제 DB 에 접속하는 테스트(@Tag("db"))는 기본 제외 — 로컬 계정 잠김 방지. 돌리려면 -PdbTest (배포킷 2026-11-05)
+        useJUnitPlatform {
+            if (!project.hasProperty('dbTest')) {
+                excludeTags 'db'
+            }
+        }
+        systemProperty 'file.encoding', 'UTF-8'
+        jvmArgs '-Dfile.encoding=UTF-8', '-Dsun.jnu.encoding=UTF-8'
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    // ── JEUS(외부 WAS) 배포용 WAR (배포킷 방식 그대로) ───────────────────
+    // 사용: ./gradlew bootWar -Pjeus            → atms-web/build/libs/atms-web.war
+    // -Pjeus 가 없으면 bootJar/bootRun(내장 톰캣) 그대로 → 로컬 개발 영향 없음
+    //  - providedRuntime : 내장 톰캣을 WEB-INF/lib 에서 제외 (JEUS 가 서블릿 컨테이너 역할)
+    //  - WEB-INF/web.xml : jeus/web.xml 템플릿. spring.profiles.active 지정 (기본 jeus, -PjeusProfile=<이름> 으로 변경)
+    //  - application-local.yml(로컬 전용 설정)은 WAR 에 넣지 않는다
+    pluginManager.withPlugin('org.springframework.boot') {
+        if (project.hasProperty('jeus')) {
+            apply plugin: 'war'
+            dependencies {
+                providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+            }
+            def jeusProfile = project.findProperty('jeusProfile') ?: 'jeus'
+            tasks.named('processResources') {
+                exclude 'application-local.yml'
+            }
+            tasks.named('bootWar') {
+                // 버전 없는 고정 파일명 (예: atms-web.war) — 배포킷 Jenkins 는 atms-*/build/libs/*.war 를 모은다
+                archiveFileName = "${project.name}.war"
+                from(rootProject.file('jeus/web.xml')) {
+                    into 'WEB-INF'
+                    expand(profile: jeusProfile, moduleName: project.name)
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,21 @@
+node_modules
+dist
+dist-demo
+dist-mock
+dist-ssr
+coverage
+playwright-report
+test-results
+*.local
+.env
+.env.*.local
+logs
+*.log
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+
+# 전 화면 자동 점검 캡쳐(npm run e2e:shots 산출물) — 저장소에 넣지 않는다(2026-11-03)
+docs/screenshots

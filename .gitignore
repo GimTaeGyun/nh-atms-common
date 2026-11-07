@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-mock/
+build/
+.gradle/
+*.log
+test-results/
+playwright-report/
+coverage/
+.env*.local

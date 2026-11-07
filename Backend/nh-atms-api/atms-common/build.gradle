@@ -1,0 +1,43 @@
+// =============================================================
+// atms-common : 공통 라이브러리 (Spring Boot 플러그인 없음 - jar 만 생성)
+//   - 응답·예외·메시지(응답코드)·로깅·페이징
+//   - 보안(SecurityConfig — 로그인 없는 고정 사용자용, 설계 §5.3)
+//   - 감사 컬럼 자동 채움(audit, 21지침 §3)
+//   - 로컬 DB 계정 지킴이(db/LocalDbLoginGuard — 배포킷에서 복사)
+// 근거: nh-atms atms-common/build.gradle + 배포킷 atms-common/build.gradle(orai18n, junit launcher, -Pjeus 제외)
+// 빼 둔 것: jjwt(로그인 없음), h2(Oracle 만), poi(서버 엑셀 없음)
+// =============================================================
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // Spring Boot starters (api 로 노출 → atms-web 이 그대로 사용)
+    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.springframework.boot:spring-boot-starter-security'
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.springframework.boot:spring-boot-starter-aop'
+
+    // MyBatis
+    api 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
+
+    // Swagger
+    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
+
+    // DB (Oracle 만)
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+    // 은행 DB 문자셋 KO16MSWIN949 처리 (없으면 ORA-17056 "지원되지 않는 문자 집합"). 버전은 Spring Boot BOM 이 ojdbc11 과 맞춤
+    runtimeOnly 'com.oracle.database.nls:orai18n'
+
+    // Test
+    testImplementation 'org.springframework.security:spring-security-test'
+    // atms-common 은 Spring Boot 플러그인이 없어 JUnit 실행기 버전을 맞춰 줘야 테스트가 돈다 (테스트 전용, WAR 영향 없음)
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// 로컬 전용 DB 설정(local-common.yml)은 JEUS WAR 용 빌드(-Pjeus)에서 jar 에 넣지 않는다 — 개발서버는 JNDI
+if (project.hasProperty('jeus')) {
+    tasks.named('jar') {
+        exclude 'local-common.yml'
+    }
+}

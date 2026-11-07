@@ -1,0 +1,17 @@
+// 폐쇄망 대응 (nh-atms 원본 settings.gradle 과 같은 방식)
+// - foojay-resolver-convention 을 쓰지 않는다: JDK 자동 다운로드(api.foojay.io)·Plugin Portal 접속이
+//   --offline 이전 단계(settings 평가)에서 실패하는 문제를 막는다. JDK 21 은 로컬 설치본(gradle.properties).
+// - pluginManagement: 사내 미러(Nexus)가 생기면 아래 주석 줄을 켜고 URL 을 바꾼다.
+pluginManagement {
+    repositories {
+        // maven { url 'http://<사내Nexus>/repository/gradle-plugins/' }   // 폐쇄망 미러
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'nh-atms-api'
+
+// 공통 라이브러리(jar) + 화면 백엔드(실행 모듈) 2개만 둔다 (설계 §5.1)
+include 'atms-common'
+include 'atms-web'
