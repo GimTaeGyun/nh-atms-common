@@ -34,6 +34,19 @@ describe('EditableGrid', () => {
     await waitFor(() => expect(ref.current!.getChanges().updated).toHaveLength(0));
   });
 
+  it("type 'amount' — 칸에 콤마로 보이고, 고친 값은 숫자로 getChanges 에 담긴다", async () => {
+    interface Fee { id: string; amt: number }
+    const ref = createRef<EditableGridHandle<Fee>>();
+    const cols: EditableColumn<Fee>[] = [
+      { title: '코드', dataIndex: 'id', width: 80 },
+      { title: '금액', dataIndex: 'amt', width: 120, editable: { type: 'amount' } },
+    ];
+    render(<ConfigProvider><EditableGrid<Fee> ref={ref} columns={cols} rows={[{ id: 'F1', amt: 1500000 }]} rowKey="id" /></ConfigProvider>);
+    const input = screen.getByDisplayValue('1,500,000');
+    fireEvent.change(input, { target: { value: '2,000,000' } });
+    await waitFor(() => expect(ref.current!.getChanges().updated).toEqual([{ id: 'F1', amt: 2000000 }]));
+  });
+
   it('행추가/행삭제/취소 + 저장 콜백', async () => {
     const ref = createRef<EditableGridHandle<Code>>();
     const onSave = vi.fn();

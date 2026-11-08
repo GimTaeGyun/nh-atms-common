@@ -5,11 +5,13 @@ import type { Rule } from 'antd/es/form';
 import type { ColumnType } from 'antd/es/table';
 import { YMD, dayjs, fromYmd, toYmd, type Dayjs } from '@/utils/date';
 import { fmtAmount, fmtDate } from '@/utils/format';
+import { AmountInput } from '@/components/forms/AmountInput';
 import type { GridGrade } from './DataGrid';
 import { sumWidth } from './columns';
 import './gridExt.css';
 
-export type EditType = 'input' | 'number' | 'select' | 'date' | 'check';
+/** number = 일반 숫자(순서·점수, 소수 가능) · amount = 금액(정수, 입력 중에도 콤마 — AmountInput) */
+export type EditType = 'input' | 'number' | 'amount' | 'select' | 'date' | 'check';
 
 export interface EditableConfig<T = never> {
   type: EditType;
@@ -109,7 +111,7 @@ const display = <T,>(c: EditableColumn<T>, v: unknown, row: T, i: number): React
   if (v === null || v === undefined || v === '') return '';
   if (ed.type === 'select') return ed.options?.find((o) => o.value === v)?.label ?? String(v);
   if (ed.type === 'date') return fmtDate(String(v));
-  if (ed.type === 'number') return fmtAmount(v as number);
+  if (ed.type === 'number' || ed.type === 'amount') return fmtAmount(v as number);
   return String(v);
 };
 
@@ -118,6 +120,8 @@ const editor = <T,>(ed: EditableConfig<T>, label: string): ReactNode => {
   switch (ed.type) {
     case 'number':
       return <InputNumber size="small" style={{ width: '100%' }} aria-label={label} placeholder={ed.placeholder} />;
+    case 'amount':
+      return <AmountInput size="small" aria-label={label} placeholder={ed.placeholder} />;
     case 'select':
       return <Select size="small" style={{ width: '100%' }} options={ed.options} aria-label={label} placeholder={ed.placeholder} allowClear />;
     case 'date':

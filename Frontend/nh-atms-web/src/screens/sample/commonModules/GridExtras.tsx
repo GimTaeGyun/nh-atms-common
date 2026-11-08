@@ -41,7 +41,8 @@ export const EditableDemo = () => {
       desc="셀을 고치면 노란 표시, [행추가]는 초록, [행삭제]는 취소선. [저장] 은 검증 통과 시 { added, updated, deleted } 한 번에."
       code={`<EditableGrid columns={cols} rows={rows} rowKey="id" newRow={() => ({ useYn: 'Y' })}
   onSave={(c) => save.mutate(c)} />   // c = BatchChanges<T> → POST /api/<업무>/batch
-// 컬럼: { title: '코드', dataIndex: 'code', editable: { type: 'input', rules: [req('코드'), maxLen(2)] } }`}
+// 컬럼: { title: '코드', dataIndex: 'code', editable: { type: 'input', rules: [req('코드'), maxLen(2)] } }
+// 금액: { title: '단가', dataIndex: 'unitPrc', editable: { type: 'amount' } }   // 입력 중 콤마, 값은 숫자`}
       echo={changes}
       echoLabel="저장 요청 본문(BatchChanges)"
     >

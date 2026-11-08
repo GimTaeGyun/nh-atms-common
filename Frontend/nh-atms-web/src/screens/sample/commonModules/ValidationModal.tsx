@@ -12,6 +12,7 @@ import type { Rule } from 'antd/es/form';
 import { SaveOutlined } from '@ant-design/icons';
 import { DetailGrid } from '@/components/display/DetailGrid';
 import { ModalTitle } from '@/components/display/ModalTitle';
+import { AmountInput } from '@/components/forms/AmountInput';
 import { formItem } from '@/components/forms/formItem';
 import { OfficeSelector } from '@/components/search/fields';
 import { today, toYmd, type Dayjs } from '@/utils/date';
@@ -102,7 +103,7 @@ const ValidationForm = ({ onClose, onDone }: Omit<Props, 'open'>) => {
           { label: '비고', span: 2, required: kind === 'ETC', value: formItem('memo', <Input placeholder="구분이 기타면 필수, 100자 이내" aria-label="비고" />, [...when(kind === 'ETC', req('비고')), ...RULES.memo]) },
           { label: '전화번호', value: formItem('telNo', <Input placeholder="02-1234-5678" aria-label="전화번호" />, RULES.telNo) },
           { label: '건수', value: formItem('cnt', <Input placeholder="숫자만" aria-label="건수" />, RULES.cnt) },
-          { label: '금액', required: true, value: formItem('amount', <InputNumber<number> style={{ width: '100%' }} min={0} step={1000} placeholder="1 ~ 1억" aria-label="금액" />, RULES.amount) },
+          { label: '금액', required: true, value: formItem('amount', <AmountInput unit="원" step={1000} placeholder="1 ~ 1억" aria-label="금액" />, RULES.amount) },
           { label: '기간(31일)', value: formItem('period', <DatePicker.RangePicker style={{ width: '100%' }} />, RULES.period) },
           { label: '시작일', required: true, value: formItem('startDate', <DatePicker style={{ width: '100%' }} aria-label="시작일" />, RULES.startDate) },
           // ④ 칸끼리 비교: 시작일이 바뀌면 종료일도 다시 검사

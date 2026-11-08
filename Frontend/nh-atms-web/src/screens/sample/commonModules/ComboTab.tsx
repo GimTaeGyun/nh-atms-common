@@ -10,6 +10,7 @@ import { SearchForm, type SearchField } from '@/components/search/SearchForm';
 import { codeField, mcnField, officeField, OfficeSelector } from '@/components/search/fields';
 import { cornerField, distinctField, modelField, parseModelValue, personField, PersonSelect, sidoField, sigunField, srcField, vendorField, ynField, YnSelect } from '@/components/search/lookupFields';
 import { allToUndef } from '@/components/search/params';
+import { AmountInput } from '@/components/forms/AmountInput';
 import { PersonNoInput, type PersonInfo } from '@/components/forms/PersonNoInput';
 import { DISTINCT_TARGETS, type DistinctTarget } from '@/domain/lookup';
 import { useAuthStore, selectOfcCode } from '@/stores/useAuthStore';
@@ -66,6 +67,7 @@ const ComboTab = () => {
   // 단독(폼 밖) 사용: 상위 값을 프롭으로 넘긴다
   const [ofc, setOfc] = useState<string | undefined>(myOfc || undefined);
   const [per, setPer] = useState<string | undefined>();
+  const [amt, setAmt] = useState<number | null>(1234567);
   const [yn, setYn] = useState<string | undefined>('');
   const [perNo, setPerNo] = useState('');
   const [resolved, setResolved] = useState<PersonInfo | null>(null);
@@ -111,6 +113,16 @@ const onSearch = (v) => search.search({ ...v, ...parseModelValue(v.modelCode), c
           echoLabel="개인번호 결과"
         >
           <PersonNoInput value={perNo} onChange={setPerNo} onResolved={setResolved} showHelp />
+        </Demo>
+        <Demo
+          title="금액 입력 (AmountInput)"
+          desc="치는 동안 1,234,567 처럼 콤마가 붙고, 값은 콤마 없는 숫자. 정수 전용·min 0·오른쪽 정렬. 폼에서는 formItem('amount', <AmountInput unit=&quot;원&quot; />, RULES.amount)."
+          code={`<AmountInput unit="원" value={amt} onChange={setAmt} />   // amt: number | null
+// 폼: formItem('amount', <AmountInput unit="원" />, RULES.amount)
+// 편집 표: editable: { type: 'amount' }`}
+          echo={{ amount: amt }}
+        >
+          <AmountInput unit="원" value={amt} onChange={setAmt} aria-label="금액 입력" style={{ width: 200 }} />
         </Demo>
         <Demo title="사용여부 (YnSelect)" desc="고정 옵션 전체('')/Y/N. '' 는 파라미터에서 빠진다." code={`<YnSelect value={yn} onChange={setYn} />   // 조회조건: ynField()`} echo={{ useYn: yn }}>
           <YnSelect value={yn} onChange={setYn} />

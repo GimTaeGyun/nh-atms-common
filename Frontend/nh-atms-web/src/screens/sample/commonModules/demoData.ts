@@ -85,13 +85,15 @@ export interface EditDemoRow {
   useYn: 'Y' | 'N';
   sortOrd: number;
   aplyDate: string;
+  /** 금액 칸 시연(EditableGrid type 'amount') */
+  unitPrc?: number;
 }
 export const EDIT_ROWS: EditDemoRow[] = [
-  { id: 1, code: 'A1', name: 'ATM-3200', useYn: 'Y', sortOrd: 1, aplyDate: '20260101' },
-  { id: 2, code: 'A2', name: 'ATM-3500', useYn: 'Y', sortOrd: 2, aplyDate: '20260301' },
-  { id: 3, code: 'B1', name: '공과금수납기', useYn: 'Y', sortOrd: 3, aplyDate: '20260515' },
-  { id: 4, code: 'C1', name: '청호 ATM', useYn: 'N', sortOrd: 4, aplyDate: '20251201' },
-  { id: 5, code: 'S1', name: 'STM', useYn: 'Y', sortOrd: 5, aplyDate: '20260901' },
+  { id: 1, code: 'A1', name: 'ATM-3200', useYn: 'Y', sortOrd: 1, aplyDate: '20260101', unitPrc: 32000000 },
+  { id: 2, code: 'A2', name: 'ATM-3500', useYn: 'Y', sortOrd: 2, aplyDate: '20260301', unitPrc: 35500000 },
+  { id: 3, code: 'B1', name: '공과금수납기', useYn: 'Y', sortOrd: 3, aplyDate: '20260515', unitPrc: 12800000 },
+  { id: 4, code: 'C1', name: '청호 ATM', useYn: 'N', sortOrd: 4, aplyDate: '20251201', unitPrc: 29000000 },
+  { id: 5, code: 'S1', name: 'STM', useYn: 'Y', sortOrd: 5, aplyDate: '20260901', unitPrc: 48000000 },
 ];
 
 /** 마스터(기기사) → 디테일(모델) 시연 */

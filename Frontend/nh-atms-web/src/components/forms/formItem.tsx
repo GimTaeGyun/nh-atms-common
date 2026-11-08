@@ -2,6 +2,7 @@ import { isValidElement, type ReactNode } from 'react';
 import { Form, Input, InputNumber } from 'antd';
 import type { Rule } from 'antd/es/form';
 import type { NamePath } from 'antd/es/form/interface';
+import { AmountInput } from './AmountInput';
 
 export interface FormItemOpts {
   /** 체크박스 단일 등: 'checked' */
@@ -18,11 +19,11 @@ export interface FormItemOpts {
 }
 
 /** 글자를 쳐서 넣는 antd 칸 — 이 칸들만 '칸 벗어날 때' 검사한다 */
-const TYPING_CONTROLS: ReadonlySet<unknown> = new Set([Input, Input.TextArea, Input.Password, Input.Search, InputNumber]);
+const TYPING_CONTROLS: ReadonlySet<unknown> = new Set([Input, Input.TextArea, Input.Password, Input.Search, InputNumber, AmountInput]);
 
 /**
  * 칸 종류별 검사 시점 (02-dev-guide §4.3). 저장(submit·validateFields)은 어느 쪽이든 전체 검사.
- *  - 글자 입력 칸(Input·TextArea·Password·Search·InputNumber): 'onBlur' — 입력 도중 성급한 검사를 막는다.
+ *  - 글자 입력 칸(Input·TextArea·Password·Search·InputNumber·AmountInput): 'onBlur' — 입력 도중 성급한 검사를 막는다.
  *  - 그 밖(Select·DatePicker·Checkbox·사무소검색·개인번호·코너/기번 선택 등): 'onChange' — 고르는 순간이 입력 완료다.
  *    자체 부품(OfficeSelector 등)은 onBlur 를 antd 에 넘기지 않아 'onBlur' 로 두면 고른 뒤에도 오류 글씨가 남는다(2026-11-03 확인).
  */

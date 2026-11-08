@@ -59,6 +59,8 @@ export const editColumns: EditableColumn<EditDemoRow>[] = [
   { title: '사용', dataIndex: 'useYn', width: 110, align: 'center', editable: { type: 'select', options: YN_OPTIONS.map((o) => ({ value: o.value, label: o.label })), rules: [req('사용여부')] } },
   { title: '정렬', dataIndex: 'sortOrd', width: 90, align: 'right', editable: { type: 'number', rules: [numRange(1, 999)] } },
   { title: '적용일', dataIndex: 'aplyDate', width: 140, align: 'center', editable: { type: 'date' } },
+  // 금액 칸: type 'amount' → 입력 중에도 콤마(AmountInput), 값은 숫자
+  { title: '단가', dataIndex: 'unitPrc', width: 130, align: 'right', editable: { type: 'amount', rules: [numRange(0, 999999999)] } },
 ];
 
 /** 견본 서버 페이징 파라미터 */
