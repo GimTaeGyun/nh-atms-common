@@ -188,12 +188,31 @@
     </select>
 
     <!-- ── 휴일: TB_NMS_HDAY(HDAY_DT CHAR(8) PK, DAY_TYPE NUMBER(1), HDAY_YN·CLOSE_YN CHAR(1)) ── -->
+    <!--
+      [임시] 개발 DB 에 TB_NMS_HDAY 가 아직 없어서 기간 안 날짜를 CONNECT BY 로 만들어 가상 표로 쓴다.
+        - 프론트 목(mocks/data/lookup.ts holidaysOf)과 같은 규칙: 날짜마다 1행,
+          토·일 또는 고정 공휴일(0101·0301·0505·0606·0815·1003·1009·1225)이면 HDAY_YN·CLOSE_YN = 'Y'.
+        - DAY_TYPE = 일 1 … 토 7 (목과 같음). 요일은 NLS 설정을 타지 않게 TRUNC(D,'IW')(월요일) 기준으로 계산.
+        - 기간은 LookupService.holidays 가 최대 MAX_HOLIDAY_DAYS 일로 막는다.
+      TB_NMS_HDAY 가 생기면 FROM 괄호 블록을 지우고 "FROM TB_NMS_HDAY" 로 되돌린다.
+    -->
     <select id="selectHolidays" resultType="kr.co.nh.atms.web.lookup.dto.LookupHoliday">
         SELECT HDAY_DT,
                DAY_TYPE,
                HDAY_YN,
                CLOSE_YN
-          FROM TB_NMS_HDAY
+          FROM (SELECT CAST(TO_CHAR(D, 'YYYYMMDD') AS CHAR(8))        AS HDAY_DT,
+                       MOD(D - TRUNC(D, 'IW') + 1, 7) + 1             AS DAY_TYPE,
+                       CAST(CASE WHEN D - TRUNC(D, 'IW') &gt;= 5
+                                   OR TO_CHAR(D, 'MMDD') IN ('0101', '0301', '0505', '0606', '0815', '1003', '1009', '1225')
+                                 THEN 'Y' ELSE 'N' END AS CHAR(1))   AS HDAY_YN,
+                       CAST(CASE WHEN D - TRUNC(D, 'IW') &gt;= 5
+                                   OR TO_CHAR(D, 'MMDD') IN ('0101', '0301', '0505', '0606', '0815', '1003', '1009', '1225')
+                                 THEN 'Y' ELSE 'N' END AS CHAR(1))   AS CLOSE_YN
+                  FROM (SELECT TO_DATE(#{from}, 'YYYYMMDD') + LEVEL - 1 AS D
+                          FROM DUAL
+                       CONNECT BY LEVEL &lt;= TO_DATE(#{to}, 'YYYYMMDD') - TO_DATE(#{from}, 'YYYYMMDD') + 1)
+               ) TB_NMS_HDAY
          WHERE HDAY_DT BETWEEN CAST(#{from} AS CHAR(8)) AND CAST(#{to} AS CHAR(8))
          ORDER BY HDAY_DT
     </select>
