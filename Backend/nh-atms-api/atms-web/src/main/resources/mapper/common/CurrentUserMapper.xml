@@ -4,13 +4,24 @@
 <!-- 현재 사용자(고정 개인번호) — TB_INSA · TB_SCR_AUTH · TB_OFC_REG_MGT (설계 §5.3, API 계약 §1) -->
 <mapper namespace="kr.co.nh.atms.web.common.auth.CurrentUserMapper">
 
-    <!-- TB_INSA.PER_NO VARCHAR2(9) -->
+    <!--
+      TB_INSA.PER_NO VARCHAR2(9)
+      [임시] 개발 DB 에 TB_INSA 가 아직 없어서 DUAL 인라인 뷰(가상 1행)로 대신한다.
+        - 설정한 개인번호(atms.fixed-user.per-no)가 그대로 PER_NO 로 돌아오므로 "인사정보 없음(ME_001)" 이 나지 않는다.
+        - NAME 은 화면 확인용 임시 값, SAMUSO·SAMUSO_NAME 은 NULL (사무소·권한은 TB_SCR_AUTH 에서 온다).
+      TB_INSA 가 생기면 아래 FROM 괄호 블록을 지우고 원래 SQL 로 되돌린다:
+        SELECT PER_NO, NAME, SAMUSO, SAMUSO_NAME FROM TB_INSA WHERE PER_NO = #{perNo}
+    -->
     <select id="selectInsa" resultType="kr.co.nh.atms.web.common.auth.InsaRow">
         SELECT PER_NO,
                NAME,
                SAMUSO,
                SAMUSO_NAME
-          FROM TB_INSA
+          FROM (SELECT CAST(#{perNo} AS VARCHAR2(9))   AS PER_NO,
+                       CAST('임시사용자' AS VARCHAR2(10)) AS NAME,
+                       CAST(NULL AS VARCHAR2(6))       AS SAMUSO,
+                       CAST(NULL AS VARCHAR2(36))      AS SAMUSO_NAME
+                  FROM DUAL) TB_INSA
          WHERE PER_NO = #{perNo}
     </select>
 
