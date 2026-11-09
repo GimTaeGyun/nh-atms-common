@@ -11,13 +11,37 @@
 <mapper namespace="kr.co.nh.atms.web.lookup.mapper.LookupMapper">
 
     <!-- ── 사무소: TB_OFC_REG_MGT(OFC_CODE CHAR(6) PK, KANM, SIDO_CODE VARCHAR2(2)) ⟕ TB_CO_SIDO(SIDO_CODE VARCHAR2(2)) ── -->
+    <!--
+      [임시] 개발 DB 에 TB_OFC_REG_MGT 가 아직 없어서(TB_CO_SIDO 도 확인 전) 가상 사무소 12행을 DUAL 인라인 뷰로 쓴다.
+        - 값은 프론트 목 mocks/data/lookup.ts OFFICES·SIDO 와 같다(007777 = 사무소명 없음 견본).
+        - TB_CO_SIDO 조인을 빼고 시도명(SIDO_NM)을 가상 행에 같이 넣었다.
+      테이블이 생기면 아래 원래 SQL 로 되돌린다:
+        SELECT O.OFC_CODE, O.KANM, O.SIDO_CODE, S.SIDO_NM
+          FROM TB_OFC_REG_MGT O
+          LEFT JOIN TB_CO_SIDO S ON S.SIDO_CODE = O.SIDO_CODE
+    -->
     <sql id="officeColumns">
         SELECT O.OFC_CODE,
                O.KANM,
                O.SIDO_CODE,
-               S.SIDO_NM
-          FROM TB_OFC_REG_MGT O
-          LEFT JOIN TB_CO_SIDO S ON S.SIDO_CODE = O.SIDO_CODE
+               O.SIDO_NM
+          FROM (SELECT CAST('000080' AS CHAR(6))      AS OFC_CODE,
+                       CAST('테크부문' AS VARCHAR2(40)) AS KANM,
+                       CAST('11' AS VARCHAR2(2))      AS SIDO_CODE,
+                       CAST('서울특별시' AS VARCHAR2(100)) AS SIDO_NM
+                  FROM DUAL
+                UNION ALL SELECT '000001', '본점영업부',     '11', '서울특별시' FROM DUAL
+                UNION ALL SELECT '000056', '광화문금융센터', '11', '서울특별시' FROM DUAL
+                UNION ALL SELECT '001234', '강남금융센터',   '11', '서울특별시' FROM DUAL
+                UNION ALL SELECT '001301', '서초중앙지점',   '11', '서울특별시' FROM DUAL
+                UNION ALL SELECT '003105', '분당중앙지점',   '41', '경기도'     FROM DUAL
+                UNION ALL SELECT '003222', '수원역지점',     '41', '경기도'     FROM DUAL
+                UNION ALL SELECT '004010', '부산중앙지점',   '26', '부산광역시' FROM DUAL
+                UNION ALL SELECT '004511', '해운대지점',     '26', '부산광역시' FROM DUAL
+                UNION ALL SELECT '005020', '대전둔산지점',   '30', '대전광역시' FROM DUAL
+                UNION ALL SELECT '006003', '광주상무지점',   '29', '광주광역시' FROM DUAL
+                UNION ALL SELECT '007777', NULL,             NULL, NULL         FROM DUAL
+               ) O
     </sql>
 
     <select id="selectOffices" resultType="kr.co.nh.atms.web.lookup.dto.LookupOffice">
