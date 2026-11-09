@@ -5,9 +5,12 @@
 <mapper namespace="kr.co.nh.atms.web.menu.mapper.MenuMapper">
 
     <!--
-      [임시] 개발 DB 에 TB_SCR_AUTH_MENU 가 아직 없어서 조인을 빼고 권한 5개를 'Y' 로 고정한다.
-        - TB_SCR_MENU 의 사용 중(USE_YN='Y') 메뉴가 모두 보인다. 고정 사용자는 지금 관리자('A')라
+      [임시] 개발 DB 에 TB_SCR_MENU · TB_SCR_AUTH_MENU 가 아직 없다.
+        - TB_SCR_AUTH_MENU: 조인을 빼고 권한 5개를 'Y' 로 고정한다. 고정 사용자는 지금 관리자('A')라
           MenuService.buildTree 가 어차피 모두 'Y' 로 덮어쓰므로 결과는 같다.
+        - TB_SCR_MENU: db/seed/01_menu.sql 과 같은 견본 5행(그룹 1 + 화면 4)을 DUAL 인라인 뷰로 만든다.
+          메뉴를 더하려면 UNION ALL 줄을 하나 더 붙인다(01_menu.sql 도 같이 고칠 것).
+      TB_SCR_MENU 가 생기면 FROM 괄호 블록을 지우고 "FROM TB_SCR_MENU M" 으로 되돌린다.
       TB_SCR_AUTH_MENU 가 생기면 원래 SQL 로 되돌린다(권한 5개 줄과 FROM 아래 조인):
                NVL(AM.QRY_ROL_YN, 'N') AS QRY_ROL_YN,   (REG·UPD·DEL·EXE 도 같은 모양)
           FROM TB_SCR_MENU M
@@ -29,7 +32,23 @@
                'Y' AS UPD_ROL_YN,
                'Y' AS DEL_ROL_YN,
                'Y' AS EXE_ROL_YN
-          FROM TB_SCR_MENU M
+          FROM (SELECT CAST('SMP000' AS VARCHAR2(10)) AS MENU_ID,
+                       CAST('0' AS VARCHAR2(10))      AS PARENT_MENU_ID,
+                       CAST('견본' AS VARCHAR2(100))  AS MENU_NM,
+                       CAST('G' AS CHAR(1))           AS MENU_TYPE,
+                       CAST(NULL AS VARCHAR2(300))    AS MENU_PATH,
+                       900                            AS SORT_NO,
+                       CAST('Y' AS CHAR(1))           AS USE_YN
+                  FROM DUAL
+                UNION ALL
+                SELECT 'SMP001', 'SMP000', '공통 모듈',    'M', '/sample/common-modules', 1, 'Y' FROM DUAL
+                UNION ALL
+                SELECT 'SMP002', 'SMP000', '공지사항',     'M', '/sample/notice',         2, 'Y' FROM DUAL
+                UNION ALL
+                SELECT 'SMP003', 'SMP000', '기기정보',     'M', '/sample/mcn-info',       3, 'Y' FROM DUAL
+                UNION ALL
+                SELECT 'SMP004', 'SMP000', '기기모델코드', 'M', '/sample/mcn-model',      4, 'Y' FROM DUAL
+               ) M
          WHERE M.USE_YN = 'Y'
          ORDER BY M.SORT_NO, M.MENU_ID
     </select>
