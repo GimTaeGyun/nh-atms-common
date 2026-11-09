@@ -8,9 +8,7 @@ plugins {
 dependencies {
     implementation project(':atms-common')
 
-    // SQL 파라미터 포함 로깅 — 로컬 개발(bootRun) 전용.
-    // developmentOnly: bootJar/bootWar(배포 산출물)에서 제외 — 운영 SQL 평문 로깅 방지
-    developmentOnly 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.2'
+    // p6spy(SQL 로그 도구)는 넣지 않는다 — 2026-11-09 사용자 결정(docs/92 §2-4)
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     // 헬스체크
