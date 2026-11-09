@@ -25,14 +25,29 @@
          WHERE PER_NO = #{perNo}
     </select>
 
-    <!-- TB_SCR_AUTH: DEPT_CODE·OFC_CODE CHAR(6), APV_STS CHAR(2), DUE_DATE CHAR(14) → RTRIM. 채택 규칙은 CurrentUserLoader.pickAuth(잠정) -->
+    <!--
+      TB_SCR_AUTH: DEPT_CODE·OFC_CODE CHAR(6), APV_STS CHAR(2), DUE_DATE CHAR(14) → RTRIM. 채택 규칙은 CurrentUserLoader.pickAuth(잠정)
+      [임시] 개발 DB 에 TB_SCR_AUTH 가 아직 없어서 DUAL 인라인 뷰(가상 1행)로 대신한다.
+        - AUTH 'A'(관리자, 잠정 Q-09) → 모든 화면·버튼 허용. 승인 'Y', 만료일 없음 → pickAuth 가 이 행을 채택한다.
+        - DEPT_CODE·OFC_CODE 는 NULL → 사무소명 조회(selectKanm)를 건너뛴다.
+      TB_SCR_AUTH 가 생기면 아래 FROM 괄호 블록을 지우고 원래 SQL 로 되돌린다:
+        SELECT RTRIM(DEPT_CODE) AS DEPT_CODE, RTRIM(OFC_CODE) AS OFC_CODE, AUTH,
+               RTRIM(APV_STS) AS APV_STS, RTRIM(DUE_DATE) AS DUE_DATE
+          FROM TB_SCR_AUTH WHERE PER_NO = #{perNo}
+    -->
     <select id="selectAuths" resultType="kr.co.nh.atms.web.common.auth.ScrAuthRow">
         SELECT RTRIM(DEPT_CODE) AS DEPT_CODE,
                RTRIM(OFC_CODE)  AS OFC_CODE,
                AUTH,
                RTRIM(APV_STS)   AS APV_STS,
                RTRIM(DUE_DATE)  AS DUE_DATE
-          FROM TB_SCR_AUTH
+          FROM (SELECT CAST(NULL AS CHAR(6))           AS DEPT_CODE,
+                       CAST(NULL AS CHAR(6))           AS OFC_CODE,
+                       CAST(#{perNo} AS VARCHAR2(9))   AS PER_NO,
+                       CAST('A' AS VARCHAR2(2))        AS AUTH,
+                       CAST('Y' AS CHAR(2))            AS APV_STS,
+                       CAST(NULL AS CHAR(14))          AS DUE_DATE
+                  FROM DUAL) TB_SCR_AUTH
          WHERE PER_NO = #{perNo}
     </select>
 
