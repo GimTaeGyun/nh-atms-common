@@ -3,7 +3,6 @@ package kr.co.nh.atms.web.common.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.nh.atms.common.audit.AuditUserProvider;
 import kr.co.nh.atms.web.common.CurrentUser;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,15 +14,21 @@ import org.springframework.context.annotation.Configuration;
  *   <li>서블릿 자동 등록 끔 — 체인 밖에서 한 번 더 돌지 않게</li>
  *   <li>감사 컬럼 개인번호 = {@link CurrentUser#perNo()}</li>
  * </ul>
- * 설정 {@code atms.fixed-user.per-no}: 저장소에는 CHANGE_ME, 실제 개인번호는 PC 의 D:\local-db.yml(로컬) 또는 내부망 설정에.
+ * 개인번호는 설정 파일이 아니라 아래 상수 {@link #PER_NO} 한 곳에 둔다(yml·D:\local-db.yml·-D 옵션 모두 안 봄).
  */
 @Configuration
 public class FixedUserConfig {
 
+    /**
+     * 고정 사용자 개인번호(TB_INSA.PER_NO) — <b>여기 한 줄만 바꾼다.</b>
+     * 저장소(GitHub)에는 CHANGE_ME 로 둔다(개인번호는 비밀값). 폐쇄망 사본에서만 실제 번호로 바꿔 빌드한다.
+     * CHANGE_ME 그대로면 /api/** 가 401 ME_001.
+     */
+    public static final String PER_NO = "CHANGE_ME";
+
     @Bean
-    public FixedUserFilter fixedUserFilter(CurrentUserLoader loader, ObjectMapper objectMapper,
-                                           @Value("${atms.fixed-user.per-no:}") String perNo) {
-        return new FixedUserFilter(loader, objectMapper, perNo);
+    public FixedUserFilter fixedUserFilter(CurrentUserLoader loader, ObjectMapper objectMapper) {
+        return new FixedUserFilter(loader, objectMapper, PER_NO);
     }
 
     @Bean

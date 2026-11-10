@@ -7,7 +7,7 @@ import { LoadingBlock } from '@/components/feedback/LoadingBlock';
  * 나(고정 사용자) 확인 관문 — 앱 시작 때 `GET /api/me` 를 한 번 읽는다(설계 Q1, 계약 §1).
  *  - 읽는 중: 로딩
  *  - 실패(401 ME_001 등): 서버 문구를 화면 전체에 그대로 보여 준다. 로그인 화면으로 보내지 않는다(되돌이 없음).
- *    문구는 서버 응답코드 테이블이 만든다(예: "고정 사용자 개인번호가 없거나 … atms.fixed-user.per-no 를 확인하세요.").
+ *    문구는 서버 응답코드 테이블이 만든다(예: "고정 사용자 개인번호가 없거나 … FixedUserConfig.PER_NO 를 확인하세요.").
  *  - 성공: children(앱 셸)
  */
 export const MeGate = ({ children }: { children: ReactNode }) => {

@@ -145,7 +145,7 @@ McnModel extends Audit { vendCode: string; vendNm?: string | null; mcnType: stri
 
 | 코드 | 구분 | 문구 |
 |---|---|---|
-| `ME_001` | E | 고정 사용자 개인번호가 없거나 인사정보에 없습니다. 설정 atms.fixed-user.per-no 를 확인하세요. |
+| `ME_001` | E | 고정 사용자 개인번호가 없거나 인사정보에 없습니다. FixedUserConfig.PER_NO 를 확인하세요. |
 | `LKP_001` | E | 사무소 또는 검색어를 입력하세요. |
 | `LKP_002` | E | 조회할 수 없는 항목입니다. ({0}) |
 | `LKP_404` | E | 사무소를 찾을 수 없습니다. ({0}) |

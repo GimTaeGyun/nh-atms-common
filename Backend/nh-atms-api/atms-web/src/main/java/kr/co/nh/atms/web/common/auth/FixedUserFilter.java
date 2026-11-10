@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 로그인 없는 고정 사용자(설계 §5.3) — {@code /api/**} 요청마다 설정 {@code atms.fixed-user.per-no} 의 개인번호로
+ * 로그인 없는 고정 사용자(설계 §5.3) — {@code /api/**} 요청마다 {@link FixedUserConfig#PER_NO} 의 개인번호로
  * {@link LoginUser} 를 SecurityContext 에 채운다.
  * <pre>
- *   요청 /api/** ─▶ 개인번호 설정 확인(비었거나 CHANGE_ME → 401 ME_001)
+ *   요청 /api/** ─▶ 개인번호 상수 확인(비었거나 CHANGE_ME → 401 ME_001)
  *               ─▶ CurrentUserLoader.load (TB_INSA 에 없으면 401 ME_001, DB 오류 500 SYS_500)
  *               ─▶ principal = LoginUser, 권한 ROLE_USER (+관리자면 ROLE_ADMIN) ─▶ 다음 필터
  * </pre>
@@ -43,11 +43,11 @@ public class FixedUserFilter extends UserContextFilter {
         this.objectMapper = objectMapper;
         this.perNo = perNo == null ? "" : perNo.trim();
         if (!isConfigured(this.perNo)) {
-            log.warn("[고정사용자] atms.fixed-user.per-no 가 설정되지 않았습니다 — /api/** 는 401 ME_001 (D:\\local-db.yml 등에 개인번호를 넣으세요)");
+            log.warn("[고정사용자] FixedUserConfig.PER_NO 가 CHANGE_ME 입니다 — /api/** 는 401 ME_001 (그 상수를 개인번호로 바꿔 빌드하세요)");
         }
     }
 
-    /** 개인번호 설정이 쓸 만한지(비었거나 CHANGE_ME 자리표시면 아님) */
+    /** 개인번호 값이 쓸 만한지(비었거나 CHANGE_ME 자리표시면 아님) */
     static boolean isConfigured(String v) {
         return v != null && !v.isBlank() && !v.trim().startsWith("CHANGE_ME");
     }

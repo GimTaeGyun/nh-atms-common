@@ -34,7 +34,7 @@
 ## 전제
 
 - 앱이 접속하는 계정(스키마)으로 실행한다. 대상 테이블이 이미 있어야 한다(`db/check`).
-- 고정 사용자(`atms.fixed-user.per-no`)의 개인번호가 `TB_INSA` 에 있어야 하고, `TB_SCR_AUTH` 에 승인(`APV_STS='Y'`)·미만료 행이 있어야 메뉴가 보인다. 없으면 `03_fixed_user_auth.sql` 틀을 쓴다.
+- 고정 사용자(`FixedUserConfig.PER_NO`)의 개인번호가 `TB_INSA` 에 있어야 하고, `TB_SCR_AUTH` 에 승인(`APV_STS='Y'`)·미만료 행이 있어야 메뉴가 보인다. 없으면 `03_fixed_user_auth.sql` 틀을 쓴다.
 - **은행 마스터 데이터는 넣지 않는다**: TB_MCN_INFO · TB_CO_MODEL · TB_INSA · TB_OFC_REG_MGT 등은 개발 DB 에 있는 실제(이관) 데이터를 쓴다.
 
 ## 은행 DB 도구에서 돌리는 법

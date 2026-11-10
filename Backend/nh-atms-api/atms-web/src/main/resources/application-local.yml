@@ -1,8 +1,9 @@
 # =====================================================================
 # atms-web 로컬(PC) 설정 — 프로파일 local (application.yml 기본값)
 #  - DB 주소는 atms-common 의 local-common.yml 한 곳 (배포킷 방식 그대로)
-#  - DB 계정·비밀번호·고정 사용자 개인번호는 저장소에 두지 않는다 → 각 PC 의 D:\local-db.yml
-#      spring.datasource.username / password, atms.fixed-user.per-no
+#  - DB 계정·비밀번호는 저장소에 두지 않는다 → 각 PC 의 D:\local-db.yml
+#      spring.datasource.username / password
+#  - 고정 사용자 개인번호는 설정이 아니라 코드 상수 FixedUserConfig.PER_NO
 #    D:\local-db.yml 이 없거나 계정이 비면 DB 에 접속하지 않고 기동을 멈춘다 (atms-common LocalDbLoginGuard)
 #  - -Pjeus WAR 에는 이 파일이 들어가지 않는다 (루트 build.gradle)
 # =====================================================================

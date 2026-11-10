@@ -26,7 +26,7 @@ export const setMockMeFail = (v: boolean): void => {
   meFail = v;
 };
 
-export const ME_001_MESSAGE = '고정 사용자 개인번호가 없거나 인사정보에 없습니다. 설정 atms.fixed-user.per-no 를 확인하세요.';
+export const ME_001_MESSAGE = '고정 사용자 개인번호가 없거나 인사정보에 없습니다. FixedUserConfig.PER_NO 를 확인하세요.';
 
 export const meHandlers = [
   http.get('/api/me', async () => {

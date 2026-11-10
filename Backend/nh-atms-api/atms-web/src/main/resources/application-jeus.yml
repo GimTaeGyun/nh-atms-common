@@ -18,8 +18,3 @@ springdoc:
   api-docs:
     # 배포킷 헬스체크가 /v3/api-docs = 200 을 본다 (deploy-war.sh) → 문서 JSON 은 켜 둔다
     enabled: true
-
-atms:
-  # 고정 사용자 개인번호 — 내부망 소스(Gitea)에서만 실제 값으로 바꾸거나 JVM 옵션 -Datms.fixed-user.per-no=...
-  fixed-user:
-    per-no: CHANGE_ME

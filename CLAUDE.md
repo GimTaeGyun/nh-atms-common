@@ -72,9 +72,9 @@
 
 ## 정해진 것 (바꾸지 않음, `docs/00_설계.md` §0.1·§13.1)
 
-- **로그인 없음 · 고정 사용자** — 설정 `atms.fixed-user.per-no` 의 개인번호 1개로 돈다.
+- **로그인 없음 · 고정 사용자** — 코드 상수 `FixedUserConfig.PER_NO`(`web/common/auth/FixedUserConfig.java`) 의 개인번호 1개로 돈다. 설정 파일로는 안 바꾼다.
   - 이름·사무소는 `TB_INSA`, 권한은 `TB_SCR_AUTH` → `TB_SCR_AUTH_MENU`(`web/common/auth/FixedUserFilter.java`, `CurrentUserLoader.java`).
-  - 값이 비었거나 `CHANGE_ME` 이면 `/api/**` 가 401 `ME_001`. 실제 값은 `D:\local-db.yml` 에(저장소 밖).
+  - 값이 비었거나 `CHANGE_ME` 이면 `/api/**` 가 401 `ME_001`. 저장소에는 `CHANGE_ME` 로 두고, 실제 번호로 바꾼 줄은 커밋하지 않는다(개인번호는 비밀값).
 - **설정은 배포킷 방식 복사**(이 저장소 안에만) — `D:\local-db.yml` + `LocalDbLoginGuard`, `orai18n`, DB 테스트 `@Tag("db")`(기본 제외, `-PdbTest` 로만), `-Pjeus` WAR + JNDI `dsATMS01`(`Backend/nh-atms-api/build.gradle` 머리말).
 - **이름: SQL 만 대문자** — SQL 키워드·테이블·컬럼은 대문자, 컬럼은 정본 이름 그대로(`SELECT OFC_CODE, KANM FROM TB_OFC_REG_MGT`). 자바·JSON·TS 필드는 MyBatis 자동 변환 camelCase(`OFC_CODE` → `ofcCode`).
 - **권한은 5개 플래그** — `TB_SCR_AUTH_MENU` 의 `QRY/REG/UPD/DEL/EXE_ROL_YN`.
@@ -207,7 +207,7 @@ npm run dev:mock
 npm run dev
 ```
 
-- 백엔드(로컬 프로필, `D:\local-db.yml` 에 DB 계정·`atms.fixed-user.per-no` 필요):
+- 백엔드(로컬 프로필, `D:\local-db.yml` 에 DB 계정, `FixedUserConfig.PER_NO` 에 개인번호 필요):
 
 ```bash
 cd Backend/nh-atms-api
